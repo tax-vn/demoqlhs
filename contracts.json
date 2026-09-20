@@ -1,1 +1,7 @@
-[]
+{
+  "records": [],
+  "settings": {
+    "warningDays": 90
+  },
+  "logs": []
+}
