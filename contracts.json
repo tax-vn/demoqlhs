@@ -49,7 +49,7 @@
       "id": 1789881906005,
       "code": "A002",
       "type": "Hợp đồng mua",
-      "partner": "qqqqqqq",
+      "partner": "DN CCC",
       "taxcode": "",
       "contractValue": "35.435.435.345.345",
       "signer": "",
@@ -80,6 +80,8 @@
     "warningDays": 90
   },
   "logs": [
+    "[13:48:11 20/9/2026] Cập nhật hồ sơ: A002",
+    "[13:48:08 20/9/2026] Tự động đồng bộ lên GitHub thành công",
     "[13:48:03 20/9/2026] Cập nhật hồ sơ: A003",
     "[13:48:00 20/9/2026] Tự động đồng bộ lên GitHub thành công",
     "[13:47:57 20/9/2026] Cập nhật hồ sơ: A004",
@@ -137,5 +139,5 @@
     "[11:53:00 20/9/2026] Thêm mới hồ sơ: 11",
     "[11:52:06 20/9/2026] Lưu dữ liệu lên GitHub thành công"
   ],
-  "lastSync": "13:48:06 20/9/2026"
+  "lastSync": "13:48:14 20/9/2026"
 }
