@@ -62,8 +62,8 @@
             
             <!-- 1. DASHBOARD TAB -->
             <div id="tab-dashboard" class="tab-content active space-y-6">
-                <!-- KPI Cards - Bổ sung thêm card Tổng giá trị HĐ (đổi grid thành 6 cột) -->
-                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <!-- KPI Cards (Sắp xếp lại thành 7 ô để hiển thị bóc tách HĐ Mua/Bán) -->
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
                     <div class="bg-white p-4 rounded shadow border-l-4 border-blue-500">
                         <div class="text-gray-500 text-xs font-medium uppercase">Tổng hồ sơ</div>
                         <div class="text-2xl font-bold mt-1" id="dash-total">0</div>
@@ -81,13 +81,17 @@
                         <div class="text-2xl font-bold text-red-600 mt-1" id="dash-expired">0</div>
                     </div>
                     <div class="bg-white p-4 rounded shadow border-l-4 border-purple-500">
-                        <div class="text-gray-500 text-xs font-medium uppercase">Tổng tài liệu</div>
+                        <div class="text-gray-500 text-xs font-medium uppercase">Tài liệu đính kèm</div>
                         <div class="text-2xl font-bold text-purple-600 mt-1" id="dash-attachments">0</div>
                     </div>
-                    <!-- THẺ MỚI: TỔNG GIÁ TRỊ -->
+                    <!-- TÁCH RIÊNG HĐ MUA VÀ BÁN -->
                     <div class="bg-white p-4 rounded shadow border-l-4 border-indigo-500">
-                        <div class="text-gray-500 text-xs font-medium uppercase">Tổng giá trị HĐ</div>
-                        <div class="text-xl font-bold text-indigo-600 mt-1" id="dash-value">0</div>
+                        <div class="text-gray-500 text-xs font-medium uppercase">Tổng HĐ Mua</div>
+                        <div class="text-xl font-bold text-indigo-600 mt-1 truncate" id="dash-value-buy" title="0">0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow border-l-4 border-teal-500">
+                        <div class="text-gray-500 text-xs font-medium uppercase">Tổng HĐ Bán</div>
+                        <div class="text-xl font-bold text-teal-600 mt-1 truncate" id="dash-value-sell" title="0">0</div>
                     </div>
                 </div>
                 
@@ -328,19 +332,18 @@
         let tokenTypingTimer = null;
 
         // --- CÁC HÀM XỬ LÝ SỐ VÀ TIỀN TỆ ---
-        // Parse "100.000 VNĐ" thành 100000 (Để cộng tổng)
+        // Bóc tách lấy đúng phần tử số để tính toán (VD: "100.000 VNĐ" -> 100000)
         function parseCurrency(str) {
             if(!str) return 0;
             const match = str.replace(/\./g, '').match(/\d+/);
             return match ? parseInt(match[0], 10) : 0;
         }
 
-        // Format 100000 thành "100.000" (Để hiển thị)
+        // Định dạng hiển thị dấu chấm hàng nghìn
         function formatNumber(num) {
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
 
-        // Dùng riêng khi người dùng đang gõ phím vào Input
         function formatCurrencyInput(input) {
             let cursorPosition = input.selectionStart;
             let originalLength = input.value.length;
@@ -508,7 +511,7 @@
 
         function renderDashboard() {
             let active = 0, warning = 0, expired = 0, totalAtt = 0;
-            let totalValue = 0; // Tính tổng HĐ
+            let totalBuy = 0, totalSell = 0; // Biến tính tổng Mua - Bán
             let typeCount = {}, yearCount = {};
             const alerts = [];
 
@@ -520,8 +523,10 @@
                 
                 totalAtt += getAttachmentsCount(r);
                 
-                // Cộng gộp Tổng giá trị
-                totalValue += parseCurrency(r.contractValue);
+                // Tách tổng mua và bán
+                let val = parseCurrency(r.contractValue);
+                if(r.type === "Hợp đồng mua") totalBuy += val;
+                if(r.type === "Hợp đồng bán") totalSell += val;
                 
                 typeCount[r.type] = (typeCount[r.type] || 0) + 1;
                 const year = r.issueDate ? r.issueDate.substring(0,4) : "Chưa rõ";
@@ -533,7 +538,14 @@
             document.getElementById('dash-warning').innerText = warning;
             document.getElementById('dash-expired').innerText = expired;
             document.getElementById('dash-attachments').innerText = totalAtt;
-            document.getElementById('dash-value').innerText = formatNumber(totalValue); // Hiển thị ra Dashboard
+            
+            // Cập nhật giá trị ra 2 ô giao diện riêng biệt
+            const buyEl = document.getElementById('dash-value-buy');
+            const sellEl = document.getElementById('dash-value-sell');
+            buyEl.innerText = formatNumber(totalBuy);
+            buyEl.title = formatNumber(totalBuy);
+            sellEl.innerText = formatNumber(totalSell);
+            sellEl.title = formatNumber(totalSell);
 
             alerts.sort((a,b) => new Date(a.r.expireDate) - new Date(b.r.expireDate));
             document.getElementById('dash-alerts-tbody').innerHTML = alerts.map(a => `
@@ -593,10 +605,15 @@
 
             filtered.sort((a, b) => b.id - a.id); 
 
-            let sumValue = 0; // Biến tính tổng lọc
+            let sumFilterBuy = 0;
+            let sumFilterSell = 0;
 
             let tbodyHtml = filtered.map((r, index) => {
-                sumValue += parseCurrency(r.contractValue); // Cộng dồn giá trị
+                // Tính toán tổng Mua / Bán dựa trên danh sách lọc
+                let val = parseCurrency(r.contractValue);
+                if(r.type === "Hợp đồng mua") sumFilterBuy += val;
+                if(r.type === "Hợp đồng bán") sumFilterSell += val;
+
                 return `
                 <tr class="hover:bg-blue-50 border-b transition-colors group">
                     <td class="px-4 py-2 text-center text-gray-500">${index + 1}</td>
@@ -617,12 +634,15 @@
                 `;
             }).join('');
 
-            // THÊM DÒNG TỔNG CỘNG VÀO CUỐI BẢNG (Chỉ hiện nếu có dữ liệu)
+            // THÊM DÒNG TỔNG CỘNG THEO LỌC
             if (filtered.length > 0) {
                 tbodyHtml += `
-                <tr class="bg-gray-200 border-t-2 border-gray-400 font-bold text-gray-800">
-                    <td colspan="5" class="px-4 py-3 text-right">TỔNG CỘNG GIÁ TRỊ (THEO DANH SÁCH LỌC):</td>
-                    <td class="px-4 py-3 text-indigo-700">${formatNumber(sumValue)}</td>
+                <tr class="bg-gray-100 border-t-2 border-gray-300">
+                    <td colspan="5" class="px-4 py-3 text-right font-bold text-gray-700 text-sm">TỔNG THEO DANH SÁCH LỌC:</td>
+                    <td class="px-4 py-3 whitespace-nowrap border-x border-gray-200">
+                        <div class="text-indigo-700 text-xs font-bold mb-1">HĐ Mua: <span class="text-sm">${formatNumber(sumFilterBuy)}</span></div>
+                        <div class="text-teal-700 text-xs font-bold">HĐ Bán: <span class="text-sm">${formatNumber(sumFilterSell)}</span></div>
+                    </td>
                     <td colspan="5"></td>
                 </tr>
                 `;
