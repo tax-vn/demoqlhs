@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Hồ Sơ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        @media print {
+            body * { visibility: hidden; }
+            #print-section, #print-section * { visibility: visible; }
+            #print-section { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+        }
+        /* Custom scrollbar cho bảng */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-800 text-white flex flex-col no-print h-full shadow-lg shrink-0">
+        <div class="p-4 flex items-center justify-center border-b border-slate-700">
+            <h1 class="text-xl font-bold tracking-wider"><i class="fa-solid fa-folder-open mr-2"></i> QUẢN LÝ HỒ SƠ</h1>
+        </div>
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <button onclick="switchTab('dashboard')" class="tab-btn w-full text-left px-4 py-3 rounded bg-blue-600 hover:bg-blue-500 transition"><i class="fa-solid fa-chart-pie w-6"></i> Tổng quan</button>
+            <button onclick="switchTab('records')" class="tab-btn w-full text-left px-4 py-3 rounded hover:bg-slate-700 transition"><i class="fa-solid fa-file-contract w-6"></i> Quản lý hồ sơ</button>
+            <button onclick="switchTab('partners')" class="tab-btn w-full text-left px-4 py-3 rounded hover:bg-slate-700 transition"><i class="fa-solid fa-handshake w-6"></i> Đối tác</button>
+            <button onclick="switchTab('settings')" class="tab-btn w-full text-left px-4 py-3 rounded hover:bg-slate-700 transition"><i class="fa-solid fa-gear w-6"></i> Cài đặt & Dữ liệu</button>
+            <button onclick="switchTab('logs')" class="tab-btn w-full text-left px-4 py-3 rounded hover:bg-slate-700 transition"><i class="fa-solid fa-clock-rotate-left w-6"></i> Nhật ký hệ thống</button>
+        </nav>
+        <div class="p-4 text-xs text-slate-400 border-t border-slate-700 text-center">
+            GitHub Sync: tax-vn/demoqlhs
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-y-auto">
+        <header class="bg-white shadow p-4 flex justify-between items-center no-print sticky top-0 z-10">
+            <h2 id="page-title" class="text-2xl font-semibold text-gray-700">Dashboard Tổng Quan</h2>
+            <div id="quick-stats" class="text-sm font-medium text-gray-500"></div>
+        </header>
+
+        <div class="p-6 flex-1">
+            
+            <!-- 1. DASHBOARD TAB -->
+            <div id="tab-dashboard" class="tab-content active space-y-6">
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div class="bg-white p-4 rounded shadow border-l-4 border-blue-500">
+                        <div class="text-gray-500 text-sm">Tổng hồ sơ</div>
+                        <div class="text-2xl font-bold" id="dash-total">0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow border-l-4 border-green-500">
+                        <div class="text-gray-500 text-sm">Đang hiệu lực</div>
+                        <div class="text-2xl font-bold text-green-600" id="dash-active">0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow border-l-4 border-yellow-500">
+                        <div class="text-gray-500 text-sm">Sắp hết hạn</div>
+                        <div class="text-2xl font-bold text-yellow-600" id="dash-warning">0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow border-l-4 border-red-500">
+                        <div class="text-gray-500 text-sm">Đã hết hạn</div>
+                        <div class="text-2xl font-bold text-red-600" id="dash-expired">0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow border-l-4 border-purple-500">
+                        <div class="text-gray-500 text-sm">Tổng tài liệu đính kèm</div>
+                        <div class="text-2xl font-bold text-purple-600" id="dash-attachments">0</div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="font-semibold mb-4 text-gray-700">Phân loại hồ sơ</h3>
+                        <!-- Đã fix khung giới hạn chiều cao cho biểu đồ -->
+                        <div class="relative w-full h-[280px] flex justify-center">
+                            <canvas id="chartType"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="font-semibold mb-4 text-gray-700">Hồ sơ theo năm ban hành</h3>
+                        <!-- Đã fix khung giới hạn chiều cao cho biểu đồ -->
+                        <div class="relative w-full h-[280px]">
+                            <canvas id="chartYear"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded shadow">
+                    <h3 class="font-semibold mb-4 text-red-600"><i class="fa-solid fa-triangle-exclamation"></i> Cảnh báo hồ sơ cần xử lý (Sắp hết hạn & Đã hết hạn)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2">Số/KH</th>
+                                    <th class="px-4 py-2">Đối tác</th>
+                                    <th class="px-4 py-2">Ngày hết hạn</th>
+                                    <th class="px-4 py-2">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-alerts-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 & 4. QUẢN LÝ HỒ SƠ & LỌC -->
+            <div id="tab-records" class="tab-content">
+                <div class="bg-white p-4 rounded shadow mb-4 flex flex-wrap gap-4 items-center no-print">
+                    <input type="text" id="filter-search" placeholder="Tìm kiếm toàn bộ nội dung..." class="border p-2 rounded flex-1 min-w-[200px]" oninput="renderRecords()">
+                    <select id="filter-type" class="border p-2 rounded" onchange="renderRecords()">
+                        <option value="">-- Tất cả loại --</option>
+                        <option>Hợp đồng mua</option><option>Hợp đồng bán</option><option>Hợp đồng lao động</option>
+                        <option>Hợp đồng dịch vụ</option><option>Hợp đồng thuê</option><option>Phụ lục</option>
+                        <option>Biên bản</option><option>Quyết định</option><option>Công văn</option>
+                        <option>Thông báo</option><option>Quy chế/quy định</option><option>Văn bản khác</option>
+                    </select>
+                    <select id="filter-partner" class="border p-2 rounded max-w-[200px]" onchange="renderRecords()"><option value="">-- Tất cả đối tác --</option></select>
+                    <select id="filter-status" class="border p-2 rounded" onchange="renderRecords()">
+                        <option value="">-- Trạng thái --</option>
+                        <option value="🟢 Đang hiệu lực">🟢 Đang hiệu lực</option>
+                        <option value="🟡 Sắp hết hạn">🟡 Sắp hết hạn</option>
+                        <option value="🔴 Đã hết hạn">🔴 Đã hết hạn</option>
+                        <option value="🔵 Chưa hiệu lực">🔵 Chưa hiệu lực</option>
+                        <option value="⚪ Không thời hạn">⚪ Không thời hạn</option>
+                    </select>
+                    
+                    <button onclick="openRecordModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow ml-auto"><i class="fa-solid fa-plus"></i> Thêm</button>
+                    <button onclick="window.print()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 shadow"><i class="fa-solid fa-print"></i> In</button>
+                </div>
+
+                <div id="print-section" class="bg-white rounded shadow overflow-x-auto relative">
+                    <table class="w-full text-sm text-left whitespace-nowrap min-w-[1200px]">
+                        <thead class="bg-gray-100 border-b sticky top-0 z-10">
+                            <tr>
+                                <th class="px-4 py-3">STT</th>
+                                <th class="px-4 py-3">Số/Ký hiệu</th>
+                                <th class="px-4 py-3">Loại</th>
+                                <th class="px-4 py-3">Đối tác</th>
+                                <th class="px-4 py-3">Mã số DN</th>
+                                <th class="px-4 py-3">Giá trị HĐ</th>
+                                <th class="px-4 py-3">Ngày BH</th>
+                                <th class="px-4 py-3">Ngày HH</th>
+                                <th class="px-4 py-3">Trạng thái</th>
+                                <th class="px-4 py-3">Tài liệu đính kèm</th>
+                                <th class="px-4 py-3 no-print sticky right-0 bg-gray-100">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="records-tbody" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. QUẢN LÝ ĐỐI TÁC -->
+            <div id="tab-partners" class="tab-content">
+                <div class="bg-white rounded shadow overflow-x-auto p-4">
+                    <table class="w-full text-sm text-left border">
+                        <thead class="bg-gray-100 border-b">
+                            <tr>
+                                <th class="px-4 py-3">Tên Đối Tác</th>
+                                <th class="px-4 py-3 text-center">Tổng hồ sơ</th>
+                                <th class="px-4 py-3 text-center text-green-600">Đang hiệu lực</th>
+                                <th class="px-4 py-3 text-center text-red-600">Đã hết hạn</th>
+                                <th class="px-4 py-3 text-center text-purple-600">Tổng tài liệu</th>
+                                <th class="px-4 py-3">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="partners-tbody" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 6 & 7. CÀI ĐẶT, ĐỒNG BỘ GITHUB, BACKUP -->
+            <div id="tab-settings" class="tab-content space-y-6">
+                <!-- GitHub Settings -->
+                <div class="bg-white p-6 rounded shadow">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2"><i class="fa-brands fa-github"></i> Đồng bộ GitHub (tax-vn/demoqlhs)</h3>
+                    <div class="flex flex-col gap-4 max-w-lg">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">GitHub Personal Access Token</label>
+                            <input type="password" id="github-token" class="border p-2 rounded w-full" placeholder="ghp_xxxxxxxxxxxx...">
+                            <p class="text-xs text-gray-500 mt-1">Lưu trữ trên máy, không lưu vào mã nguồn. Cần quyền 'repo'.</p>
+                        </div>
+                        <div class="flex gap-4">
+                            <button onclick="githubPull()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex-1"><i class="fa-solid fa-cloud-arrow-down"></i> Tải dữ liệu về</button>
+                            <button onclick="githubPush()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex-1"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu lên GitHub</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backup & Settings -->
+                <div class="bg-white p-6 rounded shadow flex flex-wrap gap-8">
+                    <div class="flex-1 min-w-[300px]">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2"><i class="fa-solid fa-sliders"></i> Cài đặt hệ thống</h3>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cảnh báo trước khi hết hạn (Ngày)</label>
+                        <input type="number" id="setting-warning-days" class="border p-2 rounded w-full mb-2" value="90">
+                        <button onclick="saveSettings()" class="bg-slate-800 text-white px-4 py-2 rounded hover:bg-slate-700 w-full">Lưu Cài Đặt</button>
+                    </div>
+                    
+                    <div class="flex-1 min-w-[300px]">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2"><i class="fa-solid fa-database"></i> Backup & Phục hồi cục bộ</h3>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="exportJSON()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600"><i class="fa-solid fa-download"></i> Backup toàn bộ (JSON)</button>
+                            <label class="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600 text-center cursor-pointer">
+                                <i class="fa-solid fa-upload"></i> Import JSON
+                                <input type="file" id="import-file" class="hidden" accept=".json" onchange="importJSON(event)">
+                            </label>
+                            <button onclick="exportCSV()" class="bg-emerald-500 text-white px-4 py-2 rounded hover:bg-emerald-600"><i class="fa-solid fa-file-csv"></i> Xuất danh sách Excel (CSV)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NHẬT KÝ -->
+            <div id="tab-logs" class="tab-content">
+                <div class="bg-white p-4 rounded shadow h-full">
+                    <button onclick="clearLogs()" class="bg-red-500 text-white px-3 py-1 rounded text-sm mb-4">Xóa nhật ký</button>
+                    <ul id="log-list" class="space-y-2 text-sm font-mono text-gray-600 h-96 overflow-y-auto"></ul>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal Thêm/Sửa Hồ Sơ -->
+    <div id="record-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[95vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-slate-50 shrink-0">
+                <h3 class="text-lg font-bold" id="modal-title">Thêm Hồ Sơ Mới</h3>
+                <button onclick="closeRecordModal()" class="text-gray-500 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-5 overflow-y-auto">
+                <input type="hidden" id="form-id">
+                
+                <!-- Cột 1 -->
+                <div class="space-y-4">
+                    <div><label class="block text-sm font-medium mb-1">Số/Ký hiệu *</label><input type="text" id="form-code" class="w-full border p-2 rounded bg-yellow-50 focus:bg-white" required></div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Loại hồ sơ *</label>
+                        <select id="form-type" class="w-full border p-2 rounded">
+                            <option>Hợp đồng mua</option><option>Hợp đồng bán</option><option>Hợp đồng lao động</option>
+                            <option>Hợp đồng dịch vụ</option><option>Hợp đồng thuê</option><option>Phụ lục</option>
+                            <option>Biên bản</option><option>Quyết định</option><option>Công văn</option>
+                            <option>Thông báo</option><option>Quy chế/quy định</option><option>Văn bản khác</option>
+                        </select>
+                    </div>
+                    <div><label class="block text-sm font-medium mb-1">Đối tác/Cơ quan</label><input type="text" id="form-partner" class="w-full border p-2 rounded"></div>
+                    <div><label class="block text-sm font-medium mb-1">Mã số doanh nghiệp (Tax Code)</label><input type="text" id="form-taxcode" class="w-full border p-2 rounded font-mono"></div>
+                </div>
+
+                <!-- Cột 2 -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Giá trị hợp đồng (VNĐ/USD...)</label>
+                        <input type="text" id="form-value" class="w-full border p-2 rounded text-green-700 font-semibold" placeholder="VD: 100.000.000 VNĐ" oninput="formatCurrency(this)">
+                    </div>
+                    <div><label class="block text-sm font-medium mb-1">Người ký</label><input type="text" id="form-signer" class="w-full border p-2 rounded"></div>
+                    <div><label class="block text-sm font-medium mb-1">Ngày ban hành</label><input type="date" id="form-issue" class="w-full border p-2 rounded"></div>
+                    <div><label class="block text-sm font-medium mb-1">Ngày nhận</label><input type="date" id="form-receive" class="w-full border p-2 rounded"></div>
+                </div>
+
+                <!-- Cột 3 -->
+                <div class="space-y-4">
+                    <div><label class="block text-sm font-medium mb-1">Ngày hiệu lực</label><input type="date" id="form-effect" class="w-full border p-2 rounded"></div>
+                    <div><label class="block text-sm font-medium mb-1">Ngày hết hạn (Trống = Không thời hạn)</label><input type="date" id="form-expire" class="w-full border p-2 rounded"></div>
+                    
+                    <div class="md:col-span-1 row-span-2">
+                        <label class="block text-sm font-medium mb-1">Trích yếu / Nội dung</label>
+                        <textarea id="form-content" rows="4" class="w-full border p-2 rounded"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Dòng cuối: Link chia thành từng ô -->
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-medium mb-2">Tài liệu đính kèm</label>
+                    <div id="attachments-container" class="space-y-2 mb-3">
+                        <!-- Các ô nhập link động -->
+                    </div>
+                    <button type="button" onclick="addAttachmentField()" class="text-sm bg-blue-100 text-blue-700 px-3 py-1.5 rounded hover:bg-blue-200 shadow-sm transition"><i class="fa-solid fa-plus"></i> Thêm Link/Tài liệu</button>
+                    <p class="text-xs text-gray-500 mt-2">Lưu ý: Nếu nhập link có chứa <b>http://</b> hoặc <b>https://</b>, hệ thống sẽ tự động tạo nút Xem/Tải ở bảng quản lý.</p>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t bg-gray-50 flex justify-end gap-3 shrink-0 rounded-b-lg">
+                <button onclick="closeRecordModal()" class="px-6 py-2 border rounded hover:bg-gray-100 font-medium">Hủy</button>
+                <button onclick="saveRecord()" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium shadow"><i class="fa-solid fa-floppy-disk"></i> Lưu Hồ Sơ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        // State
+        let data = {
+            records: [],
+            settings: { warningDays: 90 },
+            logs: []
+        };
+        let charts = {};
+        const GITHUB = { owner: 'tax-vn', repo: 'demoqlhs', path: 'contracts.json' };
+        let githubFileSha = null;
+
+        // Hàm auto-format giá trị tiền tệ
+        function formatCurrency(input) {
+            let cursorPosition = input.selectionStart;
+            let originalLength = input.value.length;
+            let value = input.value.replace(/\./g, '');
+            let formatted = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            input.value = formatted;
+            let diff = input.value.length - originalLength;
+            let newPosition = Math.max(0, cursorPosition + diff);
+            input.setSelectionRange(newPosition, newPosition);
+        }
+
+        // Quản lý các ô nhập Link đính kèm
+        function addAttachmentField(val = '') {
+            const container = document.getElementById('attachments-container');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center';
+            div.innerHTML = `
+                <input type="text" class="attachment-input flex-1 border p-2 rounded bg-blue-50 focus:bg-white" placeholder="Nhập link (https://...) hoặc tên tài liệu..." value="${val}">
+                <button type="button" onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700 p-2 bg-red-50 hover:bg-red-100 rounded transition" title="Xóa link này"><i class="fa-solid fa-trash"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
+        function init() {
+            const localData = localStorage.getItem('qlhs_data');
+            if (localData) {
+                try {
+                    let parsed = JSON.parse(localData);
+                    data.records = parsed.records || [];
+                    data.settings = parsed.settings || { warningDays: 90 };
+                    data.logs = parsed.logs || [];
+                } catch(e){}
+            }
+            document.getElementById('github-token').value = localStorage.getItem('qlhs_github_token') || '';
+            document.getElementById('setting-warning-days').value = data.settings.warningDays;
+            
+            updatePartnerFilter();
+            switchTab('dashboard');
+            addLog("Hệ thống khởi động");
+        }
+
+        function saveDataLocal() {
+            localStorage.setItem('qlhs_data', JSON.stringify(data));
+            updatePartnerFilter();
+        }
+
+        function addLog(action) {
+            const time = new Date().toLocaleString('vi-VN');
+            data.logs.unshift(`[${time}] ${action}`);
+            if(data.logs.length > 200) data.logs.pop(); 
+            saveDataLocal();
+            renderLogs();
+        }
+
+        function getStatus(record) {
+            if (!record.expireDate) return "⚪ Không thời hạn";
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const eff = record.effectDate ? new Date(record.effectDate) : null;
+            const exp = new Date(record.expireDate);
+            
+            if (eff && today < eff) return "🔵 Chưa hiệu lực";
+            if (today > exp) return "🔴 Đã hết hạn";
+            
+            const daysLeft = (exp - today) / (1000 * 60 * 60 * 24);
+            if (daysLeft <= data.settings.warningDays) return "🟡 Sắp hết hạn";
+            return "🟢 Đang hiệu lực";
+        }
+
+        function getAttachmentsCount(record) {
+            if(!record.attachments || record.attachments.trim() === "") return 0;
+            return record.attachments.split(',').filter(x => x.trim().length > 0).length;
+        }
+
+        function renderAttachmentsUI(attStr) {
+            if(!attStr || attStr.trim() === "") return '-';
+            const links = attStr.split(',').filter(x => x.trim() !== '');
+            return links.map((link, i) => {
+                let url = link.trim();
+                let isLink = url.toLowerCase().startsWith('http://') || url.toLowerCase().startsWith('https://');
+                if(isLink) {
+                    return `<a href="${url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded text-xs font-medium border border-blue-200 mr-1 mb-1 shadow-sm"><i class="fa-solid fa-cloud-arrow-down"></i> Tải/Xem ${i+1}</a>`;
+                }
+                return `<span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs border border-gray-200 mr-1 mb-1"><i class="fa-solid fa-paperclip"></i> ${url}</span>`;
+            }).join('');
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('hover:bg-slate-700');
+            });
+            
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            event.currentTarget.classList.add('bg-blue-600', 'text-white');
+            event.currentTarget.classList.remove('hover:bg-slate-700');
+
+            const titles = { dashboard: "Dashboard Tổng Quan", records: "Quản Lý Hồ Sơ", partners: "Quản Lý Đối Tác", settings: "Cài Đặt & Dữ Liệu", logs: "Nhật Ký Hệ Thống" };
+            document.getElementById('page-title').innerText = titles[tabId];
+
+            if(tabId === 'dashboard') renderDashboard();
+            if(tabId === 'records') renderRecords();
+            if(tabId === 'partners') renderPartners();
+            if(tabId === 'logs') renderLogs();
+        }
+
+        function renderDashboard() {
+            let active = 0, warning = 0, expired = 0, totalAtt = 0;
+            let typeCount = {}, yearCount = {};
+            const alerts = [];
+
+            data.records.forEach(r => {
+                const status = getStatus(r);
+                if (status === "🟢 Đang hiệu lực" || status === "⚪ Không thời hạn") active++;
+                if (status === "🟡 Sắp hết hạn") { warning++; alerts.push({r, status}); }
+                if (status === "🔴 Đã hết hạn") { expired++; alerts.push({r, status}); }
+                
+                totalAtt += getAttachmentsCount(r);
+                
+                typeCount[r.type] = (typeCount[r.type] || 0) + 1;
+                const year = r.issueDate ? r.issueDate.substring(0,4) : "Chưa rõ";
+                yearCount[year] = (yearCount[year] || 0) + 1;
+            });
+
+            document.getElementById('dash-total').innerText = data.records.length;
+            document.getElementById('dash-active').innerText = active;
+            document.getElementById('dash-warning').innerText = warning;
+            document.getElementById('dash-expired').innerText = expired;
+            document.getElementById('dash-attachments').innerText = totalAtt;
+
+            alerts.sort((a,b) => new Date(a.r.expireDate) - new Date(b.r.expireDate));
+            document.getElementById('dash-alerts-tbody').innerHTML = alerts.map(a => `
+                <tr class="border-b hover:bg-red-50">
+                    <td class="px-4 py-2 font-medium">${a.r.code}</td>
+                    <td class="px-4 py-2">${a.r.partner || '-'}</td>
+                    <td class="px-4 py-2 font-bold text-red-600">${a.r.expireDate}</td>
+                    <td class="px-4 py-2">${a.status}</td>
+                </tr>
+            `).join('');
+
+            // Khởi tạo Chart Type (Pie)
+            if(charts.type) charts.type.destroy();
+            charts.type = new Chart(document.getElementById('chartType'), {
+                type: 'pie',
+                data: { labels: Object.keys(typeCount), datasets: [{ data: Object.values(typeCount), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'] }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Khởi tạo Chart Year (Bar)
+            if(charts.year) charts.year.destroy();
+            const sortedYears = Object.keys(yearCount).sort();
+            charts.year = new Chart(document.getElementById('chartYear'), {
+                type: 'bar',
+                data: { labels: sortedYears, datasets: [{ label: 'Số lượng hồ sơ', data: sortedYears.map(y => yearCount[y]), backgroundColor: '#3b82f6' }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function updatePartnerFilter() {
+            const partners = [...new Set(data.records.map(r => r.partner).filter(p => p))].sort();
+            const sel = document.getElementById('filter-partner');
+            sel.innerHTML = '<option value="">-- Tất cả đối tác --</option>' + partners.map(p => `<option value="${p}">${p}</option>`).join('');
+        }
+
+        function renderRecords(forcePartnerFilter = null) {
+            if (forcePartnerFilter !== null) {
+                document.getElementById('filter-partner').value = forcePartnerFilter;
+                document.getElementById('filter-search').value = '';
+                document.getElementById('filter-type').value = '';
+                document.getElementById('filter-status').value = '';
+            }
+
+            const search = document.getElementById('filter-search').value.toLowerCase();
+            const fType = document.getElementById('filter-type').value;
+            const fPartner = document.getElementById('filter-partner').value;
+            const fStatus = document.getElementById('filter-status').value;
+
+            let filtered = data.records.filter(r => {
+                const status = getStatus(r);
+                const textStr = Object.values(r).join(' ').toLowerCase();
+
+                if (search && !textStr.includes(search)) return false;
+                if (fType && r.type !== fType) return false;
+                if (fPartner && r.partner !== fPartner) return false;
+                if (fStatus && status !== fStatus) return false;
+                return true;
+            });
+
+            filtered.sort((a, b) => b.id - a.id); // Mới nhất lên đầu
+
+            document.getElementById('records-tbody').innerHTML = filtered.map((r, index) => `
+                <tr class="hover:bg-blue-50 border-b transition-colors group">
+                    <td class="px-4 py-2 text-center text-gray-500">${index + 1}</td>
+                    <td class="px-4 py-2 font-bold text-gray-800">${r.code}</td>
+                    <td class="px-4 py-2">${r.type}</td>
+                    <td class="px-4 py-2 text-blue-800 font-medium">${r.partner || '-'}</td>
+                    <td class="px-4 py-2 font-mono text-gray-600">${r.taxcode || '-'}</td>
+                    <td class="px-4 py-2 font-semibold text-green-700">${r.contractValue || '-'}</td>
+                    <td class="px-4 py-2">${r.issueDate || '-'}</td>
+                    <td class="px-4 py-2">${r.expireDate || '-'}</td>
+                    <td class="px-4 py-2 whitespace-nowrap">${getStatus(r)}</td>
+                    <td class="px-4 py-2 max-w-xs whitespace-normal">${renderAttachmentsUI(r.attachments)}</td>
+                    <td class="px-4 py-2 no-print sticky right-0 bg-white group-hover:bg-blue-50 border-l border-gray-100 shadow-[inset_1px_0_0_rgba(0,0,0,0.05)]">
+                        <button onclick="editRecord(${r.id})" class="text-blue-600 hover:bg-blue-100 p-1.5 rounded mr-1" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteRecord(${r.id})" class="text-red-600 hover:bg-red-100 p-1.5 rounded" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+
+            let currentActive = filtered.filter(r => { let s = getStatus(r); return s.includes('Đang hiệu lực') || s.includes('Không thời hạn'); }).length;
+            document.getElementById('quick-stats').innerHTML = `Lọc: <b class="text-gray-800">${filtered.length}</b>/${data.records.length} hồ sơ | Hiệu lực: <b class="text-green-600">${currentActive}</b>`;
+        }
+
+        function renderPartners() {
+            let stats = {};
+            data.records.forEach(r => {
+                const p = r.partner || "Chưa xác định";
+                if(!stats[p]) stats[p] = { total: 0, active: 0, expired: 0, atts: 0 };
+                stats[p].total++;
+                const status = getStatus(r);
+                if (status === "🟢 Đang hiệu lực" || status === "⚪ Không thời hạn") stats[p].active++;
+                if (status === "🔴 Đã hết hạn") stats[p].expired++;
+                stats[p].atts += getAttachmentsCount(r);
+            });
+
+            const tbody = document.getElementById('partners-tbody');
+            tbody.innerHTML = Object.keys(stats).sort().map(p => `
+                <tr class="hover:bg-gray-50 border-b">
+                    <td class="px-4 py-2 font-medium text-blue-800">${p}</td>
+                    <td class="px-4 py-2 text-center font-bold">${stats[p].total}</td>
+                    <td class="px-4 py-2 text-center text-green-600">${stats[p].active}</td>
+                    <td class="px-4 py-2 text-center text-red-600">${stats[p].expired}</td>
+                    <td class="px-4 py-2 text-center text-purple-600">${stats[p].atts}</td>
+                    <td class="px-4 py-2 text-center">
+                        <button onclick="viewPartnerRecords('${p}')" class="text-white bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-xs shadow"><i class="fa-solid fa-filter"></i> Lọc hồ sơ</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function viewPartnerRecords(partnerName) {
+            switchTab('records');
+            const p = partnerName === "Chưa xác định" ? "" : partnerName;
+            renderRecords(p);
+        }
+
+        function renderLogs() {
+            document.getElementById('log-list').innerHTML = data.logs.map(l => `<li>${l}</li>`).join('');
+        }
+        function clearLogs() {
+            if(confirm("Bạn muốn xóa toàn bộ lịch sử thao tác cục bộ?")) {
+                data.logs = [];
+                addLog("Đã xóa lịch sử thao tác");
+            }
+        }
+
+        function openRecordModal() {
+            document.getElementById('form-id').value = '';
+            document.querySelectorAll('#record-modal input:not(.attachment-input), #record-modal textarea').forEach(el => el.value = '');
+            document.getElementById('form-type').selectedIndex = 0;
+            
+            // Xóa rỗng danh sách link và tạo 1 ô trống mặc định
+            document.getElementById('attachments-container').innerHTML = '';
+            addAttachmentField();
+
+            document.getElementById('modal-title').innerText = "Thêm Hồ Sơ Mới";
+            document.getElementById('record-modal').classList.remove('hidden');
+        }
+
+        function closeRecordModal() {
+            document.getElementById('record-modal').classList.add('hidden');
+        }
+
+        function saveRecord() {
+            const idVal = document.getElementById('form-id').value;
+            
+            // Gom dữ liệu từ tất cả các ô nhập link
+            const attInputs = document.querySelectorAll('.attachment-input');
+            const attValues = Array.from(attInputs).map(input => input.value.trim()).filter(val => val !== '');
+            const attachmentsString = attValues.join(',');
+
+            const record = {
+                id: idVal ? parseInt(idVal) : Date.now(),
+                code: document.getElementById('form-code').value.trim(),
+                type: document.getElementById('form-type').value,
+                partner: document.getElementById('form-partner').value.trim(),
+                taxcode: document.getElementById('form-taxcode').value.trim(),
+                contractValue: document.getElementById('form-value').value.trim(), 
+                signer: document.getElementById('form-signer').value.trim(),
+                issueDate: document.getElementById('form-issue').value,
+                receiveDate: document.getElementById('form-receive').value,
+                effectDate: document.getElementById('form-effect').value,
+                expireDate: document.getElementById('form-expire').value,
+                attachments: attachmentsString,
+                content: document.getElementById('form-content').value
+            };
+
+            if(!record.code || !record.type) return alert("Vui lòng nhập Số/Ký hiệu và Chọn loại hồ sơ!");
+
+            if (idVal) {
+                const idx = data.records.findIndex(r => r.id === parseInt(idVal));
+                data.records[idx] = record;
+                addLog(`Cập nhật hồ sơ: ${record.code}`);
+            } else {
+                data.records.push(record);
+                addLog(`Thêm mới hồ sơ: ${record.code}`);
+            }
+
+            saveDataLocal();
+            closeRecordModal();
+            renderRecords();
+        }
+
+        function editRecord(id) {
+            const r = data.records.find(x => x.id === id);
+            if(!r) return;
+            document.getElementById('form-id').value = r.id;
+            document.getElementById('form-code').value = r.code;
+            document.getElementById('form-type').value = r.type;
+            document.getElementById('form-partner').value = r.partner || '';
+            document.getElementById('form-taxcode').value = r.taxcode || '';
+            document.getElementById('form-value').value = r.contractValue || '';
+            document.getElementById('form-signer').value = r.signer || '';
+            document.getElementById('form-issue').value = r.issueDate || '';
+            document.getElementById('form-receive').value = r.receiveDate || '';
+            document.getElementById('form-effect').value = r.effectDate || '';
+            document.getElementById('form-expire').value = r.expireDate || '';
+            document.getElementById('form-content').value = r.content || '';
+            
+            // Xử lý nạp các link tài liệu vào thành từng ô
+            const container = document.getElementById('attachments-container');
+            container.innerHTML = '';
+            if (r.attachments && r.attachments.trim() !== '') {
+                const atts = r.attachments.split(',');
+                atts.forEach(att => {
+                    if(att.trim() !== '') addAttachmentField(att.trim());
+                });
+            } else {
+                addAttachmentField(); // Tạo 1 ô trống nếu không có link nào
+            }
+
+            document.getElementById('modal-title').innerText = "Cập Nhật Hồ Sơ";
+            document.getElementById('record-modal').classList.remove('hidden');
+        }
+
+        function deleteRecord(id) {
+            const r = data.records.find(x => x.id === id);
+            if(confirm(`Bạn có chắc muốn xóa hồ sơ: ${r.code}?`)) {
+                data.records = data.records.filter(x => x.id !== id);
+                addLog(`Xóa hồ sơ: ${r.code}`);
+                saveDataLocal();
+                renderRecords();
+            }
+        }
+
+        function saveSettings() {
+            const days = parseInt(document.getElementById('setting-warning-days').value);
+            const token = document.getElementById('github-token').value.trim();
+            if(!isNaN(days)) data.settings.warningDays = days;
+            localStorage.setItem('qlhs_github_token', token);
+            saveDataLocal();
+            addLog("Thay đổi cài đặt hệ thống");
+            alert("Lưu cài đặt thành công!");
+        }
+
+        function exportJSON() {
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `backup_hoso_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            addLog("Backup dữ liệu JSON");
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if(parsed.records) {
+                        data = parsed;
+                        saveDataLocal();
+                        addLog("Import dữ liệu từ file JSON");
+                        alert("Phục hồi dữ liệu thành công!");
+                        location.reload();
+                    } else alert("File JSON không đúng định dạng.");
+                } catch(err) { alert("Lỗi đọc file JSON!"); }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportCSV() {
+            let csv = '\uFEFF';
+            csv += "Số/Ký hiệu,Loại,Đối tác,Mã số DN,Giá trị HĐ,Người ký,Ngày ban hành,Ngày hiệu lực,Ngày hết hạn,Tài liệu,Trạng thái\n";
+            data.records.forEach(r => {
+                const status = getStatus(r);
+                const row = [
+                    r.code, r.type, r.partner, r.taxcode, r.contractValue, 
+                    r.signer, r.issueDate, r.effectDate, r.expireDate, 
+                    r.attachments, status
+                ].map(v => `"${(v||'').replace(/"/g, '""')}"`);
+                csv += row.join(',') + "\n";
+            });
+            const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `danh_sach_hoso.csv`;
+            a.click();
+            addLog("Xuất danh sách ra CSV");
+        }
+
+        // --- GITHUB API ---
+        const b64EncodeUnicode = str => btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+        const b64DecodeUnicode = str => decodeURIComponent(Array.prototype.map.call(atob(str), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+
+        async function githubPull() {
+            const token = document.getElementById('github-token').value.trim();
+            if(!token) return alert("Vui lòng nhập Token GitHub!");
+            
+            try {
+                document.body.style.cursor = 'wait';
+                const res = await fetch(`https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.path}`, {
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+                
+                if (res.status === 404) return alert("File không tồn tại trên GitHub. Bạn có thể Lưu dữ liệu lên để tạo mới.");
+                if (!res.ok) throw new Error("Lỗi xác thực (HTTP " + res.status + ")");
+                
+                const fileInfo = await res.json();
+                githubFileSha = fileInfo.sha;
+                
+                const contentStr = b64DecodeUnicode(fileInfo.content);
+                const remoteData = JSON.parse(contentStr);
+                
+                if (remoteData && remoteData.records) {
+                    data = remoteData;
+                    saveDataLocal();
+                    addLog("Tải dữ liệu mới nhất từ GitHub");
+                    alert("Tải dữ liệu thành công!");
+                    location.reload();
+                }
+            } catch(e) {
+                alert("Lỗi khi tải từ GitHub: " + e.message);
+            } finally {
+                document.body.style.cursor = 'default';
+            }
+        }
+
+        async function githubPush() {
+            const token = document.getElementById('github-token').value.trim();
+            if(!token) return alert("Vui lòng nhập Token GitHub!");
+            
+            try {
+                document.body.style.cursor = 'wait';
+                const getRes = await fetch(`https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.path}`, {
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+                if(getRes.ok) {
+                    const fileInfo = await getRes.json();
+                    githubFileSha = fileInfo.sha;
+                }
+
+                const content = b64EncodeUnicode(JSON.stringify(data, null, 2));
+                const body = {
+                    message: `Cập nhật dữ liệu lúc ${new Date().toLocaleString('vi-VN')}`,
+                    content: content,
+                    sha: githubFileSha || undefined
+                };
+
+                const putRes = await fetch(`https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.path}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if(!putRes.ok) throw new Error(await putRes.text());
+                
+                const putData = await putRes.json();
+                githubFileSha = putData.content.sha;
+                
+                addLog("Lưu dữ liệu lên GitHub thành công");
+                alert("Đồng bộ lên GitHub thành công!");
+            } catch(e) {
+                alert("Lỗi khi lưu lên GitHub: " + e.message);
+            } finally {
+                document.body.style.cursor = 'default';
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
