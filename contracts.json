@@ -58,13 +58,15 @@
       "effectDate": "2026-09-19",
       "expireDate": "2026-09-21",
       "attachments": "https://luat.ngotran.vn/",
-      "content": ""
+      "content": "11111"
     }
   ],
   "settings": {
     "warningDays": 90
   },
   "logs": [
+    "[12:33:53 20/9/2026] Cập nhật hồ sơ: qqqqq",
+    "[12:33:44 20/9/2026] Tự động đồng bộ lên GitHub",
     "[12:33:43 20/9/2026] Cập nhật hồ sơ: aaa",
     "[12:33:20 20/9/2026] Tải dữ liệu mới nhất từ GitHub",
     "[12:32:07 20/9/2026] Xóa hồ sơ: eeee",
@@ -99,5 +101,5 @@
     "[11:53:00 20/9/2026] Thêm mới hồ sơ: 11",
     "[11:52:06 20/9/2026] Lưu dữ liệu lên GitHub thành công"
   ],
-  "lastSync": "12:33:43 20/9/2026"
+  "lastSync": "12:33:54 20/9/2026"
 }
