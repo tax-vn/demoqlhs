@@ -29,12 +29,30 @@
       "expireDate": "2026-09-20",
       "attachments": "https://luat.ngotran.vn/",
       "content": ""
+    },
+    {
+      "id": 1789881760405,
+      "code": "assss",
+      "type": "Hợp đồng mua",
+      "partner": "aaaaaa",
+      "taxcode": "",
+      "contractValue": "6.456.456.456.456.546",
+      "signer": "",
+      "issueDate": "2026-09-19",
+      "receiveDate": "",
+      "effectDate": "2026-09-17",
+      "expireDate": "2026-09-19",
+      "attachments": "",
+      "content": ""
     }
   ],
   "settings": {
     "warningDays": 90
   },
   "logs": [
+    "[12:22:40 20/9/2026] Thêm mới hồ sơ: assss",
+    "[12:21:55 20/9/2026] Backup dữ liệu JSON",
+    "[12:21:43 20/9/2026] Tự động đồng bộ lên GitHub",
     "[12:21:40 20/9/2026] Thêm mới hồ sơ: aaaaa",
     "[12:21:02 20/9/2026] Lưu dữ liệu lên GitHub (Thủ công)",
     "[12:19:05 20/9/2026] Lỗi đồng bộ GitHub: Failed to fetch",
@@ -42,5 +60,5 @@
     "[12:06:42 20/9/2026] Lỗi đồng bộ GitHub: Failed to fetch",
     "[11:35:09 20/9/2026] Đã xóa lịch sử thao tác"
   ],
-  "lastSync": "12:21:41 20/9/2026"
+  "lastSync": "12:22:41 20/9/2026"
 }
