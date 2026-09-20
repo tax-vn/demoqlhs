@@ -89,14 +89,12 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white p-4 rounded shadow">
                         <h3 class="font-semibold mb-4 text-gray-700">Phân loại hồ sơ</h3>
-                        <!-- Đã fix khung giới hạn chiều cao cho biểu đồ -->
                         <div class="relative w-full h-[280px] flex justify-center">
                             <canvas id="chartType"></canvas>
                         </div>
                     </div>
                     <div class="bg-white p-4 rounded shadow">
                         <h3 class="font-semibold mb-4 text-gray-700">Hồ sơ theo năm ban hành</h3>
-                        <!-- Đã fix khung giới hạn chiều cao cho biểu đồ -->
                         <div class="relative w-full h-[280px]">
                             <canvas id="chartYear"></canvas>
                         </div>
@@ -318,6 +316,7 @@
         let charts = {};
         const GITHUB = { owner: 'tax-vn', repo: 'demoqlhs', path: 'contracts.json' };
         let githubFileSha = null;
+        let autoSyncTimer = null; // Timer gộp lệnh đồng bộ (Debounce)
 
         // Làm sạch Token khỏi dấu cách, ký tự ẩn 
         function getCleanToken() {
@@ -325,13 +324,17 @@
             return t.replace(/\s+/g, ''); // Xóa toàn bộ dấu cách, enter, tab
         }
 
+        // Cập nhật giao diện Đồng Bộ
         function updateSyncUI(status, time = null) {
             const el = document.getElementById('sync-status');
             if (!el) return;
             
-            if (status === 'syncing') {
+            if (status === 'pending') {
+                el.className = 'hidden md:flex items-center gap-2 text-sm px-3 py-1.5 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200 font-medium transition-all shadow-sm';
+                el.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin"></i> <span>Đang chờ đồng bộ...</span>';
+            } else if (status === 'syncing') {
                 el.className = 'hidden md:flex items-center gap-2 text-sm px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-medium transition-all shadow-sm';
-                el.innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin"></i> <span>Đang đồng bộ...</span>';
+                el.innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin"></i> <span>Đang đẩy lên Cloud...</span>';
             } else if (status === 'success') {
                 el.className = 'hidden md:flex items-center gap-2 text-sm px-3 py-1.5 rounded-full bg-green-50 text-green-700 border border-green-200 font-medium transition-all shadow-sm';
                 el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> <span>Đã đồng bộ: ${time}</span>`;
@@ -340,9 +343,25 @@
                 el.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <span>Lỗi đồng bộ</span>';
                 el.title = "Không thể kết nối API. Vui lòng kiểm tra Token hoặc mạng.";
             } else if (status === 'unconfigured') {
-                el.className = 'hidden md:flex items-center gap-2 text-sm px-3 py-1.5 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200 font-medium transition-all shadow-sm';
+                el.className = 'hidden md:flex items-center gap-2 text-sm px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200 font-medium transition-all shadow-sm';
                 el.innerHTML = '<i class="fa-solid fa-gear"></i> <span>Chưa cấu hình GitHub</span>';
             }
+        }
+
+        // KÍCH HOẠT ĐỒNG BỘ NGẦM (DEBOUNCE 2.5 GIÂY)
+        function triggerAutoSync() {
+            const token = getCleanToken();
+            if(!token) return; // Nếu chưa cài token thì bỏ qua luôn
+            
+            updateSyncUI('pending');
+            
+            // Xóa bộ đếm cũ nếu có thao tác mới liên tiếp
+            if (autoSyncTimer) clearTimeout(autoSyncTimer);
+            
+            // Chờ 2.5 giây sau thao tác cuối cùng mới gộp lại đẩy lên GitHub
+            autoSyncTimer = setTimeout(() => {
+                githubPush(true);
+            }, 2500);
         }
 
         function formatCurrency(input) {
@@ -603,7 +622,7 @@
             if(confirm("Bạn muốn xóa toàn bộ lịch sử thao tác cục bộ?")) {
                 data.logs = [];
                 addLog("Đã xóa lịch sử thao tác");
-                githubPush(true); 
+                triggerAutoSync(); // GỌI QUY TRÌNH CHUẨN
             }
         }
 
@@ -660,7 +679,9 @@
             saveDataLocal();
             closeRecordModal();
             renderRecords();
-            githubPush(true);
+            
+            // GỌI QUY TRÌNH CHUẨN TỰ ĐỘNG ĐỒNG BỘ (GỘP THAO TÁC)
+            triggerAutoSync();
         }
 
         function editRecord(id) {
@@ -701,7 +722,9 @@
                 addLog(`Xóa hồ sơ: ${r.code}`);
                 saveDataLocal();
                 renderRecords();
-                githubPush(true);
+                
+                // GỌI QUY TRÌNH CHUẨN TỰ ĐỘNG ĐỒNG BỘ (GỘP THAO TÁC)
+                triggerAutoSync();
             }
         }
 
@@ -721,7 +744,7 @@
             addLog("Thay đổi cài đặt hệ thống");
             alert("Lưu cài đặt thành công!");
             
-            if(token) updateSyncUI(data.lastSync ? 'success' : 'syncing', data.lastSync);
+            if(token) updateSyncUI(data.lastSync ? 'success' : 'unconfigured', data.lastSync);
             else updateSyncUI('unconfigured');
         }
 
@@ -773,7 +796,7 @@
             addLog("Xuất danh sách ra CSV");
         }
 
-        // --- GITHUB API & TỰ ĐỘNG ĐỒNG BỘ ---
+        // --- GITHUB API ---
         const b64EncodeUnicode = str => btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
         const b64DecodeUnicode = str => decodeURIComponent(Array.prototype.map.call(atob(str), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
 
@@ -785,7 +808,6 @@
                 document.body.style.cursor = 'wait';
                 updateSyncUI('syncing');
                 
-                // Đã đưa về chuẩn token cũ chống CORS
                 const res = await fetch(`https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.path}`, {
                     headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
@@ -815,39 +837,31 @@
                 }
             } catch(e) {
                 updateSyncUI('error');
-                if (e.message.includes('Failed to fetch')) {
-                     alert("Lỗi 'Failed to fetch': Vui lòng kiểm tra kết nối mạng hoặc dán lại Token.");
-                } else {
-                     alert("Lỗi khi tải từ GitHub: " + e.message);
-                }
+                alert("Lỗi khi tải từ GitHub: " + e.message);
             } finally {
                 document.body.style.cursor = 'default';
             }
         }
 
+        // isAuto = true -> Chạy ngầm, không popup cảnh báo
         async function githubPush(isAuto = false) {
             const token = getCleanToken();
-            
-            if(!token) {
-                updateSyncUI('unconfigured');
-                if(!isAuto) alert("Vui lòng nhập Token GitHub trong Cài đặt!");
-                return;
-            }
+            if(!token) return;
             
             try {
                 if(!isAuto) document.body.style.cursor = 'wait';
                 updateSyncUI('syncing');
                 
-                // Đã đưa về chuẩn token cũ chống CORS
+                // 1. Luôn Lấy mã SHA mới nhất trước khi lưu đè (Để tránh lỗi 409 Conflict)
                 const getRes = await fetch(`https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.path}`, {
                     headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
-                
                 if(getRes.ok) {
                     const fileInfo = await getRes.json();
                     githubFileSha = fileInfo.sha;
                 }
 
+                // 2. Cập nhật và đẩy lên
                 const time = new Date().toLocaleString('vi-VN');
                 data.lastSync = time; 
                 
@@ -867,24 +881,18 @@
                 if(!putRes.ok) throw new Error(await putRes.text());
                 
                 const putData = await putRes.json();
-                githubFileSha = putData.content.sha;
+                githubFileSha = putData.content.sha; // Lưu SHA mới cho lần đẩy kế tiếp
                 
                 saveDataLocal(); 
                 updateSyncUI('success', time);
-                addLog(isAuto ? "Tự động đồng bộ lên GitHub" : "Lưu dữ liệu lên GitHub (Thủ công)");
+                addLog(isAuto ? "Tự động đồng bộ lên GitHub thành công" : "Lưu dữ liệu lên GitHub (Thủ công)");
                 
                 if(!isAuto) alert("Đồng bộ lên GitHub thành công!");
                 
             } catch(e) {
                 updateSyncUI('error');
                 addLog("Lỗi đồng bộ GitHub: " + e.message);
-                if(!isAuto) {
-                    if (e.message.includes('Failed to fetch')) {
-                        alert("Lỗi 'Failed to fetch': Vui lòng dán lại Token hoặc kiểm tra mạng.");
-                    } else {
-                        alert("Lỗi khi lưu lên GitHub: " + e.message);
-                    }
-                }
+                if(!isAuto) alert("Lỗi khi lưu lên GitHub: " + e.message);
             } finally {
                 if(!isAuto) document.body.style.cursor = 'default';
             }
