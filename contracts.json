@@ -47,7 +47,7 @@
     },
     {
       "id": 1789881906005,
-      "code": "qqqqq",
+      "code": "A002",
       "type": "Hợp đồng mua",
       "partner": "qqqqqqq",
       "taxcode": "",
@@ -80,6 +80,8 @@
     "warningDays": 90
   },
   "logs": [
+    "[13:47:09 20/9/2026] Cập nhật hồ sơ: A002",
+    "[13:47:05 20/9/2026] Tự động đồng bộ lên GitHub thành công",
     "[13:47:01 20/9/2026] Cập nhật hồ sơ: A001",
     "[13:46:44 20/9/2026] Lưu dữ liệu lên GitHub (Thủ công)",
     "[12:36:17 20/9/2026] Lưu dữ liệu lên GitHub (Thủ công)",
@@ -123,5 +125,5 @@
     "[11:53:00 20/9/2026] Thêm mới hồ sơ: 11",
     "[11:52:06 20/9/2026] Lưu dữ liệu lên GitHub thành công"
   ],
-  "lastSync": "13:47:04 20/9/2026"
+  "lastSync": "13:47:12 20/9/2026"
 }
