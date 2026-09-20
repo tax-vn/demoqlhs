@@ -103,16 +103,18 @@
       "effectDate": "2026-09-20",
       "expireDate": "",
       "attachments": "",
-      "content": "00"
+      "content": "11"
     }
   ],
   "settings": {
     "warningDays": 90
   },
   "logs": [
+    "[14:48:15 20/9/2026] Cập nhật hồ sơ: A007",
+    "[14:48:02 20/9/2026] Tải dữ liệu mới nhất từ GitHub",
     "[14:46:21 20/9/2026] Cập nhật hồ sơ: A007",
     "[14:46:08 20/9/2026] Tải dữ liệu mới nhất từ GitHub",
     "[14:34:33 20/9/2026] Đã xóa lịch sử thao tác"
   ],
-  "lastSync": "14:46:23 20/9/2026"
+  "lastSync": "14:48:17 20/9/2026"
 }
