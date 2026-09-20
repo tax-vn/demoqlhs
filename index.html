@@ -193,11 +193,14 @@
                     <div class="flex flex-col gap-4 max-w-lg">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">GitHub Personal Access Token</label>
-                            <input type="password" id="github-token" class="border p-2 rounded w-full bg-blue-50 focus:bg-white" placeholder="ghp_xxxxxxxxxxxx...">
-                            <p class="text-xs text-gray-500 mt-1">Lưu trữ an toàn trên trình duyệt máy bạn. Cần quyền 'repo'. Khi đã cấu hình, hệ thống sẽ tự động đồng bộ khi bạn thêm/sửa/xóa hồ sơ.</p>
+                            <!-- BỔ SUNG oninput="handleTokenInput()" ĐỂ TỰ ĐỘNG NHẬN DIỆN TOKEN -->
+                            <input type="password" id="github-token" class="border p-2 rounded w-full bg-blue-50 focus:bg-white" placeholder="ghp_xxxxxxxxxxxx..." oninput="handleTokenInput()">
+                            <p class="text-xs text-gray-500 mt-1">
+                                <b class="text-blue-600">Máy mới truy cập:</b> Bạn chỉ cần dán Token vào ô trên, hệ thống sẽ tự động quét và tải toàn bộ dữ liệu từ Cloud về máy mà không cần bấm thêm nút nào!
+                            </p>
                         </div>
                         <div class="flex gap-4">
-                            <button onclick="githubPull()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex-1 font-medium"><i class="fa-solid fa-cloud-arrow-down"></i> Tải dữ liệu về</button>
+                            <button onclick="githubPull(false)" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex-1 font-medium"><i class="fa-solid fa-cloud-arrow-down"></i> Tải dữ liệu về</button>
                             <button onclick="githubPush(false)" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex-1 font-medium"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu bắt buộc (Thủ công)</button>
                         </div>
                     </div>
@@ -316,12 +319,32 @@
         let charts = {};
         const GITHUB = { owner: 'tax-vn', repo: 'demoqlhs', path: 'contracts.json' };
         let githubFileSha = null;
-        let autoSyncTimer = null; // Timer gộp lệnh đồng bộ (Debounce)
+        
+        let autoSyncTimer = null; // Timer cho thao tác Thêm/Sửa/Xóa
+        let tokenTypingTimer = null; // Timer cho thao tác dán Token
 
         // Làm sạch Token khỏi dấu cách, ký tự ẩn 
         function getCleanToken() {
             let t = document.getElementById('github-token').value || localStorage.getItem('qlhs_github_token') || '';
             return t.replace(/\s+/g, ''); // Xóa toàn bộ dấu cách, enter, tab
+        }
+
+        // AUTO TẢI DỮ LIỆU KHI NHẬP/DÁN TOKEN VÀO MÁY MỚI
+        function handleTokenInput() {
+            clearTimeout(tokenTypingTimer);
+            tokenTypingTimer = setTimeout(() => {
+                const token = getCleanToken();
+                const oldToken = localStorage.getItem('qlhs_github_token') || '';
+                
+                // Nếu Token nhập vào đủ dài (Chuẩn GitHub trên 30 ký tự) và là mã mới
+                if (token.length > 30 && token !== oldToken) {
+                    localStorage.setItem('qlhs_github_token', token);
+                    addLog("Tự động nhận diện Token mới. Tiến hành kết nối tải dữ liệu...");
+                    
+                    // Gọi hàm Tải về tự động (Truyền tham số true)
+                    githubPull(true);
+                }
+            }, 800); // Đợi 0.8s sau khi dừng dán/nhập
         }
 
         // Cập nhật giao diện Đồng Bộ
@@ -334,7 +357,7 @@
                 el.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin"></i> <span>Đang chờ đồng bộ...</span>';
             } else if (status === 'syncing') {
                 el.className = 'hidden md:flex items-center gap-2 text-sm px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-medium transition-all shadow-sm';
-                el.innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin"></i> <span>Đang đẩy lên Cloud...</span>';
+                el.innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin"></i> <span>Đang kết nối Cloud...</span>';
             } else if (status === 'success') {
                 el.className = 'hidden md:flex items-center gap-2 text-sm px-3 py-1.5 rounded-full bg-green-50 text-green-700 border border-green-200 font-medium transition-all shadow-sm';
                 el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> <span>Đã đồng bộ: ${time}</span>`;
@@ -348,20 +371,19 @@
             }
         }
 
-        // KÍCH HOẠT ĐỒNG BỘ NGẦM (DEBOUNCE 2.5 GIÂY)
+        // KÍCH HOẠT ĐỒNG BỘ NGẦM (DEBOUNCE 2 GIÂY)
         function triggerAutoSync() {
             const token = getCleanToken();
             if(!token) return; // Nếu chưa cài token thì bỏ qua luôn
             
             updateSyncUI('pending');
             
-            // Xóa bộ đếm cũ nếu có thao tác mới liên tiếp
             if (autoSyncTimer) clearTimeout(autoSyncTimer);
             
-            // Chờ 2.5 giây sau thao tác cuối cùng mới gộp lại đẩy lên GitHub
+            // Chờ 2 giây sau thao tác cuối cùng mới gộp lại đẩy lên GitHub
             autoSyncTimer = setTimeout(() => {
                 githubPush(true);
-            }, 2500);
+            }, 2000);
         }
 
         function formatCurrency(input) {
@@ -680,7 +702,7 @@
             closeRecordModal();
             renderRecords();
             
-            // GỌI QUY TRÌNH CHUẨN TỰ ĐỘNG ĐỒNG BỘ (GỘP THAO TÁC)
+            // KÍCH HOẠT TỰ ĐỘNG ĐỒNG BỘ CHỜ (DEBOUNCE)
             triggerAutoSync();
         }
 
@@ -723,21 +745,20 @@
                 saveDataLocal();
                 renderRecords();
                 
-                // GỌI QUY TRÌNH CHUẨN TỰ ĐỘNG ĐỒNG BỘ (GỘP THAO TÁC)
+                // KÍCH HOẠT TỰ ĐỘNG ĐỒNG BỘ CHỜ (DEBOUNCE)
                 triggerAutoSync();
             }
         }
 
         function saveSettings() {
             const days = parseInt(document.getElementById('setting-warning-days').value);
-            const tokenInput = document.getElementById('github-token').value;
-            const token = tokenInput.replace(/\s+/g, ''); 
+            const token = getCleanToken(); 
             
             if(!isNaN(days)) data.settings.warningDays = days;
             
             if(token !== localStorage.getItem('qlhs_github_token')) {
                  localStorage.setItem('qlhs_github_token', token);
-                 addLog("Cập nhật Token GitHub");
+                 addLog("Cập nhật Token GitHub thủ công");
             }
             
             saveDataLocal();
@@ -796,13 +817,18 @@
             addLog("Xuất danh sách ra CSV");
         }
 
-        // --- GITHUB API ---
+        // --- GITHUB API & TỰ ĐỘNG ĐỒNG BỘ ---
         const b64EncodeUnicode = str => btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
         const b64DecodeUnicode = str => decodeURIComponent(Array.prototype.map.call(atob(str), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
 
-        async function githubPull() {
+        // Hàm PULL (Tải xuống)
+        // isAutoLoad = true -> Tự động kéo lúc vừa dán Token
+        async function githubPull(isAutoLoad = false) {
             const token = getCleanToken();
-            if(!token) return alert("Vui lòng nhập Token GitHub trong Cài đặt!");
+            if(!token) {
+                if(!isAutoLoad) alert("Vui lòng nhập Token GitHub trong Cài đặt!");
+                return;
+            }
             
             try {
                 document.body.style.cursor = 'wait';
@@ -814,7 +840,9 @@
                 
                 if (res.status === 404) {
                     updateSyncUI('success', 'Chưa có file trên GitHub');
-                    return alert("File không tồn tại trên GitHub. Bạn hãy bấm Lưu lên GitHub để tạo mới.");
+                    if(isAutoLoad) alert("Máy mới: Token hợp lệ nhưng trên Cloud chưa có dữ liệu. Hệ thống sẵn sàng đồng bộ mới!");
+                    else alert("File không tồn tại trên GitHub. Bạn hãy bấm Lưu lên GitHub để tạo mới.");
+                    return;
                 }
                 if (!res.ok) throw new Error("Lỗi HTTP " + res.status);
                 
@@ -832,17 +860,25 @@
                     saveDataLocal();
                     addLog("Tải dữ liệu mới nhất từ GitHub");
                     updateSyncUI('success', time);
-                    alert("Tải dữ liệu thành công!");
+                    
+                    if(isAutoLoad) alert("Đã tự động tải toàn bộ dữ liệu từ Cloud về máy tính này thành công!");
+                    else alert("Tải dữ liệu thành công!");
+                    
                     location.reload();
                 }
             } catch(e) {
                 updateSyncUI('error');
-                alert("Lỗi khi tải từ GitHub: " + e.message);
+                if (e.message.includes('Failed to fetch')) {
+                     alert("Lỗi mạng: Vui lòng tắt chặn quảng cáo (Adblock) hoặc kiểm tra lại Token.");
+                } else {
+                     if(!isAutoLoad) alert("Lỗi khi tải từ GitHub: " + e.message);
+                }
             } finally {
                 document.body.style.cursor = 'default';
             }
         }
 
+        // Hàm PUSH (Đẩy lên)
         // isAuto = true -> Chạy ngầm, không popup cảnh báo
         async function githubPush(isAuto = false) {
             const token = getCleanToken();
@@ -856,6 +892,7 @@
                 const getRes = await fetch(`https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.path}`, {
                     headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
+                
                 if(getRes.ok) {
                     const fileInfo = await getRes.json();
                     githubFileSha = fileInfo.sha;
