@@ -38,7 +38,7 @@
       "taxcode": "",
       "contractValue": "234.434.124",
       "signer": "",
-      "issueDate": "",
+      "issueDate": "2026-09-20",
       "receiveDate": "",
       "effectDate": "2026-09-20",
       "expireDate": "",
@@ -110,6 +110,8 @@
     "warningDays": 90
   },
   "logs": [
+    "[21:19:07 20/9/2026] Cập nhật hồ sơ: A003",
+    "[21:18:00 20/9/2026] Tự động đồng bộ lên GitHub thành công",
     "[21:17:56 20/9/2026] Cập nhật hồ sơ: A007",
     "[14:48:18 20/9/2026] Tự động đồng bộ lên GitHub thành công",
     "[14:48:15 20/9/2026] Cập nhật hồ sơ: A007",
@@ -118,5 +120,5 @@
     "[14:46:08 20/9/2026] Tải dữ liệu mới nhất từ GitHub",
     "[14:34:33 20/9/2026] Đã xóa lịch sử thao tác"
   ],
-  "lastSync": "21:17:59 20/9/2026"
+  "lastSync": "21:19:10 20/9/2026"
 }
