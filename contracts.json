@@ -46,21 +46,6 @@
       "content": ""
     },
     {
-      "id": 1789881093993,
-      "code": "aa",
-      "type": "Hợp đồng mua",
-      "partner": "",
-      "taxcode": "",
-      "contractValue": "2.143.431.431.414",
-      "signer": "",
-      "issueDate": "2026-09-19",
-      "receiveDate": "2026-09-27",
-      "effectDate": "2026-09-19",
-      "expireDate": "2026-09-19",
-      "attachments": "",
-      "content": ""
-    },
-    {
       "id": 1789881906005,
       "code": "qqqqq",
       "type": "Hợp đồng mua",
@@ -95,6 +80,8 @@
     "warningDays": 90
   },
   "logs": [
+    "[12:31:52 20/9/2026] Xóa hồ sơ: aa",
+    "[12:31:42 20/9/2026] Tải dữ liệu mới nhất từ GitHub",
     "[12:30:39 20/9/2026] Lưu dữ liệu lên GitHub (Thủ công)",
     "[12:26:57 20/9/2026] Tự động đồng bộ lên GitHub",
     "[12:26:56 20/9/2026] Cập nhật hồ sơ: eeee",
@@ -123,5 +110,5 @@
     "[11:53:00 20/9/2026] Thêm mới hồ sơ: 11",
     "[11:52:06 20/9/2026] Lưu dữ liệu lên GitHub thành công"
   ],
-  "lastSync": "12:31:28 20/9/2026"
+  "lastSync": "12:32:01 20/9/2026"
 }
