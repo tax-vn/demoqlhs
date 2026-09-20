@@ -62,27 +62,32 @@
             
             <!-- 1. DASHBOARD TAB -->
             <div id="tab-dashboard" class="tab-content active space-y-6">
-                <!-- KPI Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <!-- KPI Cards - Bổ sung thêm card Tổng giá trị HĐ (đổi grid thành 6 cột) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
                     <div class="bg-white p-4 rounded shadow border-l-4 border-blue-500">
-                        <div class="text-gray-500 text-sm">Tổng hồ sơ</div>
-                        <div class="text-2xl font-bold" id="dash-total">0</div>
+                        <div class="text-gray-500 text-xs font-medium uppercase">Tổng hồ sơ</div>
+                        <div class="text-2xl font-bold mt-1" id="dash-total">0</div>
                     </div>
                     <div class="bg-white p-4 rounded shadow border-l-4 border-green-500">
-                        <div class="text-gray-500 text-sm">Đang hiệu lực</div>
-                        <div class="text-2xl font-bold text-green-600" id="dash-active">0</div>
+                        <div class="text-gray-500 text-xs font-medium uppercase">Đang hiệu lực</div>
+                        <div class="text-2xl font-bold text-green-600 mt-1" id="dash-active">0</div>
                     </div>
                     <div class="bg-white p-4 rounded shadow border-l-4 border-yellow-500">
-                        <div class="text-gray-500 text-sm">Sắp hết hạn</div>
-                        <div class="text-2xl font-bold text-yellow-600" id="dash-warning">0</div>
+                        <div class="text-gray-500 text-xs font-medium uppercase">Sắp hết hạn</div>
+                        <div class="text-2xl font-bold text-yellow-600 mt-1" id="dash-warning">0</div>
                     </div>
                     <div class="bg-white p-4 rounded shadow border-l-4 border-red-500">
-                        <div class="text-gray-500 text-sm">Đã hết hạn</div>
-                        <div class="text-2xl font-bold text-red-600" id="dash-expired">0</div>
+                        <div class="text-gray-500 text-xs font-medium uppercase">Đã hết hạn</div>
+                        <div class="text-2xl font-bold text-red-600 mt-1" id="dash-expired">0</div>
                     </div>
                     <div class="bg-white p-4 rounded shadow border-l-4 border-purple-500">
-                        <div class="text-gray-500 text-sm">Tổng tài liệu đính kèm</div>
-                        <div class="text-2xl font-bold text-purple-600" id="dash-attachments">0</div>
+                        <div class="text-gray-500 text-xs font-medium uppercase">Tổng tài liệu</div>
+                        <div class="text-2xl font-bold text-purple-600 mt-1" id="dash-attachments">0</div>
+                    </div>
+                    <!-- THẺ MỚI: TỔNG GIÁ TRỊ -->
+                    <div class="bg-white p-4 rounded shadow border-l-4 border-indigo-500">
+                        <div class="text-gray-500 text-xs font-medium uppercase">Tổng giá trị HĐ</div>
+                        <div class="text-xl font-bold text-indigo-600 mt-1" id="dash-value">0</div>
                     </div>
                 </div>
                 
@@ -193,7 +198,6 @@
                     <div class="flex flex-col gap-4 max-w-lg">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">GitHub Personal Access Token</label>
-                            <!-- BỔ SUNG oninput="handleTokenInput()" ĐỂ TỰ ĐỘNG NHẬN DIỆN TOKEN -->
                             <input type="password" id="github-token" class="border p-2 rounded w-full bg-blue-50 focus:bg-white" placeholder="ghp_xxxxxxxxxxxx..." oninput="handleTokenInput()">
                             <p class="text-xs text-gray-500 mt-1">
                                 <b class="text-blue-600">Máy mới truy cập:</b> Bạn chỉ cần dán Token vào ô trên, hệ thống sẽ tự động quét và tải toàn bộ dữ liệu từ Cloud về máy mà không cần bấm thêm nút nào!
@@ -271,7 +275,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">Giá trị hợp đồng (VNĐ/USD...)</label>
-                        <input type="text" id="form-value" class="w-full border p-2 rounded text-green-700 font-semibold" placeholder="VD: 100.000.000 VNĐ" oninput="formatCurrency(this)">
+                        <input type="text" id="form-value" class="w-full border p-2 rounded text-green-700 font-semibold" placeholder="VD: 100.000.000 VNĐ" oninput="formatCurrencyInput(this)">
                     </div>
                     <div><label class="block text-sm font-medium mb-1">Người ký</label><input type="text" id="form-signer" class="w-full border p-2 rounded"></div>
                     <div><label class="block text-sm font-medium mb-1">Ngày ban hành</label><input type="date" id="form-issue" class="w-full border p-2 rounded"></div>
@@ -320,34 +324,53 @@
         const GITHUB = { owner: 'tax-vn', repo: 'demoqlhs', path: 'contracts.json' };
         let githubFileSha = null;
         
-        let autoSyncTimer = null; // Timer cho thao tác Thêm/Sửa/Xóa
-        let tokenTypingTimer = null; // Timer cho thao tác dán Token
+        let autoSyncTimer = null; 
+        let tokenTypingTimer = null;
 
-        // Làm sạch Token khỏi dấu cách, ký tự ẩn 
-        function getCleanToken() {
-            let t = document.getElementById('github-token').value || localStorage.getItem('qlhs_github_token') || '';
-            return t.replace(/\s+/g, ''); // Xóa toàn bộ dấu cách, enter, tab
+        // --- CÁC HÀM XỬ LÝ SỐ VÀ TIỀN TỆ ---
+        // Parse "100.000 VNĐ" thành 100000 (Để cộng tổng)
+        function parseCurrency(str) {
+            if(!str) return 0;
+            const match = str.replace(/\./g, '').match(/\d+/);
+            return match ? parseInt(match[0], 10) : 0;
         }
 
-        // AUTO TẢI DỮ LIỆU KHI NHẬP/DÁN TOKEN VÀO MÁY MỚI
+        // Format 100000 thành "100.000" (Để hiển thị)
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        // Dùng riêng khi người dùng đang gõ phím vào Input
+        function formatCurrencyInput(input) {
+            let cursorPosition = input.selectionStart;
+            let originalLength = input.value.length;
+            let value = input.value.replace(/\./g, '');
+            let formatted = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            input.value = formatted;
+            let diff = input.value.length - originalLength;
+            let newPosition = Math.max(0, cursorPosition + diff);
+            input.setSelectionRange(newPosition, newPosition);
+        }
+
+        // --- CÁC HÀM TIỆN ÍCH ---
+        function getCleanToken() {
+            let t = document.getElementById('github-token').value || localStorage.getItem('qlhs_github_token') || '';
+            return t.replace(/\s+/g, ''); 
+        }
+
         function handleTokenInput() {
             clearTimeout(tokenTypingTimer);
             tokenTypingTimer = setTimeout(() => {
                 const token = getCleanToken();
                 const oldToken = localStorage.getItem('qlhs_github_token') || '';
-                
-                // Nếu Token nhập vào đủ dài (Chuẩn GitHub trên 30 ký tự) và là mã mới
                 if (token.length > 30 && token !== oldToken) {
                     localStorage.setItem('qlhs_github_token', token);
                     addLog("Tự động nhận diện Token mới. Tiến hành kết nối tải dữ liệu...");
-                    
-                    // Gọi hàm Tải về tự động (Truyền tham số true)
                     githubPull(true);
                 }
-            }, 800); // Đợi 0.8s sau khi dừng dán/nhập
+            }, 800);
         }
 
-        // Cập nhật giao diện Đồng Bộ
         function updateSyncUI(status, time = null) {
             const el = document.getElementById('sync-status');
             if (!el) return;
@@ -371,30 +394,14 @@
             }
         }
 
-        // KÍCH HOẠT ĐỒNG BỘ NGẦM (DEBOUNCE 2 GIÂY)
         function triggerAutoSync() {
             const token = getCleanToken();
-            if(!token) return; // Nếu chưa cài token thì bỏ qua luôn
-            
+            if(!token) return; 
             updateSyncUI('pending');
-            
             if (autoSyncTimer) clearTimeout(autoSyncTimer);
-            
-            // Chờ 2 giây sau thao tác cuối cùng mới gộp lại đẩy lên GitHub
             autoSyncTimer = setTimeout(() => {
                 githubPush(true);
             }, 2000);
-        }
-
-        function formatCurrency(input) {
-            let cursorPosition = input.selectionStart;
-            let originalLength = input.value.length;
-            let value = input.value.replace(/\./g, '');
-            let formatted = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            input.value = formatted;
-            let diff = input.value.length - originalLength;
-            let newPosition = Math.max(0, cursorPosition + diff);
-            input.setSelectionRange(newPosition, newPosition);
         }
 
         function addAttachmentField(val = '') {
@@ -501,6 +508,7 @@
 
         function renderDashboard() {
             let active = 0, warning = 0, expired = 0, totalAtt = 0;
+            let totalValue = 0; // Tính tổng HĐ
             let typeCount = {}, yearCount = {};
             const alerts = [];
 
@@ -512,6 +520,9 @@
                 
                 totalAtt += getAttachmentsCount(r);
                 
+                // Cộng gộp Tổng giá trị
+                totalValue += parseCurrency(r.contractValue);
+                
                 typeCount[r.type] = (typeCount[r.type] || 0) + 1;
                 const year = r.issueDate ? r.issueDate.substring(0,4) : "Chưa rõ";
                 yearCount[year] = (yearCount[year] || 0) + 1;
@@ -522,6 +533,7 @@
             document.getElementById('dash-warning').innerText = warning;
             document.getElementById('dash-expired').innerText = expired;
             document.getElementById('dash-attachments').innerText = totalAtt;
+            document.getElementById('dash-value').innerText = formatNumber(totalValue); // Hiển thị ra Dashboard
 
             alerts.sort((a,b) => new Date(a.r.expireDate) - new Date(b.r.expireDate));
             document.getElementById('dash-alerts-tbody').innerHTML = alerts.map(a => `
@@ -581,7 +593,11 @@
 
             filtered.sort((a, b) => b.id - a.id); 
 
-            document.getElementById('records-tbody').innerHTML = filtered.map((r, index) => `
+            let sumValue = 0; // Biến tính tổng lọc
+
+            let tbodyHtml = filtered.map((r, index) => {
+                sumValue += parseCurrency(r.contractValue); // Cộng dồn giá trị
+                return `
                 <tr class="hover:bg-blue-50 border-b transition-colors group">
                     <td class="px-4 py-2 text-center text-gray-500">${index + 1}</td>
                     <td class="px-4 py-2 font-bold text-gray-800">${r.code}</td>
@@ -598,7 +614,21 @@
                         <button onclick="deleteRecord(${r.id})" class="text-red-600 hover:bg-red-100 p-1.5 rounded" title="Xóa"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
+
+            // THÊM DÒNG TỔNG CỘNG VÀO CUỐI BẢNG (Chỉ hiện nếu có dữ liệu)
+            if (filtered.length > 0) {
+                tbodyHtml += `
+                <tr class="bg-gray-200 border-t-2 border-gray-400 font-bold text-gray-800">
+                    <td colspan="5" class="px-4 py-3 text-right">TỔNG CỘNG GIÁ TRỊ (THEO DANH SÁCH LỌC):</td>
+                    <td class="px-4 py-3 text-indigo-700">${formatNumber(sumValue)}</td>
+                    <td colspan="5"></td>
+                </tr>
+                `;
+            }
+
+            document.getElementById('records-tbody').innerHTML = tbodyHtml;
 
             let currentActive = filtered.filter(r => { let s = getStatus(r); return s.includes('Đang hiệu lực') || s.includes('Không thời hạn'); }).length;
             document.getElementById('quick-stats').innerHTML = `Lọc: <b class="text-gray-800">${filtered.length}</b>/${data.records.length} hồ sơ | Hiệu lực: <b class="text-green-600">${currentActive}</b>`;
@@ -644,7 +674,7 @@
             if(confirm("Bạn muốn xóa toàn bộ lịch sử thao tác cục bộ?")) {
                 data.logs = [];
                 addLog("Đã xóa lịch sử thao tác");
-                triggerAutoSync(); // GỌI QUY TRÌNH CHUẨN
+                triggerAutoSync(); 
             }
         }
 
@@ -702,7 +732,6 @@
             closeRecordModal();
             renderRecords();
             
-            // KÍCH HOẠT TỰ ĐỘNG ĐỒNG BỘ CHỜ (DEBOUNCE)
             triggerAutoSync();
         }
 
@@ -745,7 +774,6 @@
                 saveDataLocal();
                 renderRecords();
                 
-                // KÍCH HOẠT TỰ ĐỘNG ĐỒNG BỘ CHỜ (DEBOUNCE)
                 triggerAutoSync();
             }
         }
@@ -817,12 +845,10 @@
             addLog("Xuất danh sách ra CSV");
         }
 
-        // --- GITHUB API & TỰ ĐỘNG ĐỒNG BỘ ---
+        // --- GITHUB API ---
         const b64EncodeUnicode = str => btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
         const b64DecodeUnicode = str => decodeURIComponent(Array.prototype.map.call(atob(str), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
 
-        // Hàm PULL (Tải xuống)
-        // isAutoLoad = true -> Tự động kéo lúc vừa dán Token
         async function githubPull(isAutoLoad = false) {
             const token = getCleanToken();
             if(!token) {
@@ -878,8 +904,6 @@
             }
         }
 
-        // Hàm PUSH (Đẩy lên)
-        // isAuto = true -> Chạy ngầm, không popup cảnh báo
         async function githubPush(isAuto = false) {
             const token = getCleanToken();
             if(!token) return;
@@ -888,7 +912,6 @@
                 if(!isAuto) document.body.style.cursor = 'wait';
                 updateSyncUI('syncing');
                 
-                // 1. Luôn Lấy mã SHA mới nhất trước khi lưu đè (Để tránh lỗi 409 Conflict)
                 const getRes = await fetch(`https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.path}`, {
                     headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
@@ -898,7 +921,6 @@
                     githubFileSha = fileInfo.sha;
                 }
 
-                // 2. Cập nhật và đẩy lên
                 const time = new Date().toLocaleString('vi-VN');
                 data.lastSync = time; 
                 
@@ -918,7 +940,7 @@
                 if(!putRes.ok) throw new Error(await putRes.text());
                 
                 const putData = await putRes.json();
-                githubFileSha = putData.content.sha; // Lưu SHA mới cho lần đẩy kế tiếp
+                githubFileSha = putData.content.sha;
                 
                 saveDataLocal(); 
                 updateSyncUI('success', time);
