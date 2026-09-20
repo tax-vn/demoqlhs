@@ -74,12 +74,29 @@
       "expireDate": "2026-09-21",
       "attachments": "https://luat.ngotran.vn/",
       "content": ""
+    },
+    {
+      "id": 1789881998021,
+      "code": "eeee",
+      "type": "Hợp đồng mua",
+      "partner": "",
+      "taxcode": "",
+      "contractValue": "32.432.324.324.324",
+      "signer": "",
+      "issueDate": "2026-09-20",
+      "receiveDate": "",
+      "effectDate": "2026-09-20",
+      "expireDate": "2028-09-30",
+      "attachments": "",
+      "content": ""
     }
   ],
   "settings": {
     "warningDays": 90
   },
   "logs": [
+    "[12:26:38 20/9/2026] Thêm mới hồ sơ: eeee",
+    "[12:26:05 20/9/2026] Tự động đồng bộ lên GitHub",
     "[12:26:03 20/9/2026] Cập nhật hồ sơ: aa",
     "[12:25:51 20/9/2026] Tự động đồng bộ lên GitHub",
     "[12:25:50 20/9/2026] Cập nhật hồ sơ: aa",
@@ -102,5 +119,5 @@
     "[11:53:00 20/9/2026] Thêm mới hồ sơ: 11",
     "[11:52:06 20/9/2026] Lưu dữ liệu lên GitHub thành công"
   ],
-  "lastSync": "12:26:03 20/9/2026"
+  "lastSync": "12:26:38 20/9/2026"
 }
