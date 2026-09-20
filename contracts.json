@@ -64,7 +64,7 @@
       "id": 1789882548648,
       "code": "A001",
       "type": "Hợp đồng mua",
-      "partner": "",
+      "partner": "DN EEE",
       "taxcode": "",
       "contractValue": "4.354.355.345.435",
       "signer": "",
@@ -80,6 +80,8 @@
     "warningDays": 90
   },
   "logs": [
+    "[13:48:19 20/9/2026] Cập nhật hồ sơ: A001",
+    "[13:48:16 20/9/2026] Tự động đồng bộ lên GitHub thành công",
     "[13:48:11 20/9/2026] Cập nhật hồ sơ: A002",
     "[13:48:08 20/9/2026] Tự động đồng bộ lên GitHub thành công",
     "[13:48:03 20/9/2026] Cập nhật hồ sơ: A003",
@@ -139,5 +141,5 @@
     "[11:53:00 20/9/2026] Thêm mới hồ sơ: 11",
     "[11:52:06 20/9/2026] Lưu dữ liệu lên GitHub thành công"
   ],
-  "lastSync": "13:48:14 20/9/2026"
+  "lastSync": "13:48:22 20/9/2026"
 }
