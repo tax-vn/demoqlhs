@@ -89,12 +89,29 @@
       "expireDate": "2026-09-22",
       "attachments": "",
       "content": "0"
+    },
+    {
+      "id": 1789889610573,
+      "code": "A007",
+      "type": "Hợp đồng mua",
+      "partner": "DN CCC",
+      "taxcode": "",
+      "contractValue": "111.111.324.142",
+      "signer": "",
+      "issueDate": "2026-09-20",
+      "receiveDate": "",
+      "effectDate": "2026-09-20",
+      "expireDate": "",
+      "attachments": "",
+      "content": ""
     }
   ],
   "settings": {
     "warningDays": 90
   },
   "logs": [
+    "[14:33:30 20/9/2026] Thêm mới hồ sơ: A007",
+    "[14:24:30 20/9/2026] Lưu dữ liệu lên GitHub (Thủ công)",
     "[14:24:24 20/9/2026] Tự động đồng bộ lên GitHub thành công",
     "[14:24:21 20/9/2026] Cập nhật hồ sơ: A006",
     "[14:24:05 20/9/2026] Tải dữ liệu mới nhất từ GitHub",
@@ -166,5 +183,5 @@
     "[11:53:00 20/9/2026] Thêm mới hồ sơ: 11",
     "[11:52:06 20/9/2026] Lưu dữ liệu lên GitHub thành công"
   ],
-  "lastSync": "14:24:29 20/9/2026"
+  "lastSync": "14:33:33 20/9/2026"
 }
