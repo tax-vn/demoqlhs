@@ -2,9 +2,9 @@
   "records": [
     {
       "id": 1789879980923,
-      "code": "A005",
+      "code": "11",
       "type": "Hợp đồng mua",
-      "partner": "DN AAA",
+      "partner": "aaaaaaaa",
       "taxcode": "0313091222",
       "contractValue": "1.000.000.000",
       "signer": "www",
@@ -17,9 +17,9 @@
     },
     {
       "id": 1789880020178,
-      "code": "A004",
+      "code": "aaa",
       "type": "Hợp đồng mua",
-      "partner": "DN BBB",
+      "partner": "",
       "taxcode": "",
       "contractValue": "165.406.165.165",
       "signer": "",
@@ -32,9 +32,9 @@
     },
     {
       "id": 1789880037325,
-      "code": "A003",
+      "code": "111",
       "type": "Hợp đồng mua",
-      "partner": "DN BBB",
+      "partner": "",
       "taxcode": "",
       "contractValue": "234.434.124",
       "signer": "",
@@ -47,9 +47,9 @@
     },
     {
       "id": 1789881906005,
-      "code": "A002",
+      "code": "qqqqq",
       "type": "Hợp đồng mua",
-      "partner": "DN CCC",
+      "partner": "qqqqqqq",
       "taxcode": "",
       "contractValue": "35.435.435.345.345",
       "signer": "",
@@ -62,9 +62,9 @@
     },
     {
       "id": 1789882548648,
-      "code": "A001",
+      "code": "rrrrr",
       "type": "Hợp đồng mua",
-      "partner": "DN EEE",
+      "partner": "",
       "taxcode": "",
       "contractValue": "4.354.355.345.435",
       "signer": "",
@@ -80,27 +80,7 @@
     "warningDays": 90
   },
   "logs": [
-    "[13:48:19 20/9/2026] Cập nhật hồ sơ: A001",
-    "[13:48:16 20/9/2026] Tự động đồng bộ lên GitHub thành công",
-    "[13:48:11 20/9/2026] Cập nhật hồ sơ: A002",
-    "[13:48:08 20/9/2026] Tự động đồng bộ lên GitHub thành công",
-    "[13:48:03 20/9/2026] Cập nhật hồ sơ: A003",
-    "[13:48:00 20/9/2026] Tự động đồng bộ lên GitHub thành công",
-    "[13:47:57 20/9/2026] Cập nhật hồ sơ: A004",
-    "[13:47:53 20/9/2026] Tự động đồng bộ lên GitHub thành công",
-    "[13:47:49 20/9/2026] Cập nhật hồ sơ: A005",
-    "[13:47:39 20/9/2026] Tự động đồng bộ lên GitHub thành công",
-    "[13:47:36 20/9/2026] Cập nhật hồ sơ: A005",
-    "[13:47:33 20/9/2026] Tự động đồng bộ lên GitHub thành công",
-    "[13:47:29 20/9/2026] Cập nhật hồ sơ: A004",
-    "[13:47:24 20/9/2026] Tự động đồng bộ lên GitHub thành công",
-    "[13:47:20 20/9/2026] Cập nhật hồ sơ: A003",
-    "[13:47:13 20/9/2026] Tự động đồng bộ lên GitHub thành công",
-    "[13:47:09 20/9/2026] Cập nhật hồ sơ: A002",
-    "[13:47:05 20/9/2026] Tự động đồng bộ lên GitHub thành công",
-    "[13:47:01 20/9/2026] Cập nhật hồ sơ: A001",
-    "[13:46:44 20/9/2026] Lưu dữ liệu lên GitHub (Thủ công)",
-    "[12:36:17 20/9/2026] Lưu dữ liệu lên GitHub (Thủ công)",
+    "[12:37:07 20/9/2026] Tải dữ liệu mới nhất từ GitHub",
     "[12:35:48 20/9/2026] Thêm mới hồ sơ: rrrrr",
     "[12:34:00 20/9/2026] Lưu dữ liệu lên GitHub (Thủ công)",
     "[12:33:54 20/9/2026] Cập nhật hồ sơ: qqqqq",
@@ -141,5 +121,5 @@
     "[11:53:00 20/9/2026] Thêm mới hồ sơ: 11",
     "[11:52:06 20/9/2026] Lưu dữ liệu lên GitHub thành công"
   ],
-  "lastSync": "13:48:22 20/9/2026"
+  "lastSync": "13:49:19 20/9/2026"
 }
