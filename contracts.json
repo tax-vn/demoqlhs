@@ -50,6 +50,10 @@
     "warningDays": 90
   },
   "logs": [
+    "[12:01:59 20/9/2026] Lỗi đồng bộ GitHub: Failed to fetch",
+    "[12:01:46 20/9/2026] Lỗi đồng bộ GitHub: Failed to fetch",
+    "[12:01:36 20/9/2026] Lỗi đồng bộ GitHub: Failed to fetch",
+    "[11:56:01 20/9/2026] Lưu dữ liệu lên GitHub thành công",
     "[11:54:31 20/9/2026] Cập nhật hồ sơ: aaa",
     "[11:54:21 20/9/2026] Cập nhật hồ sơ: 11",
     "[11:53:57 20/9/2026] Thêm mới hồ sơ: 111",
