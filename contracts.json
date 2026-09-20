@@ -19,7 +19,7 @@
       "id": 1789880020178,
       "code": "A004",
       "type": "Hợp đồng mua",
-      "partner": "",
+      "partner": "DN BBB",
       "taxcode": "",
       "contractValue": "165.406.165.165",
       "signer": "",
@@ -80,6 +80,8 @@
     "warningDays": 90
   },
   "logs": [
+    "[13:47:57 20/9/2026] Cập nhật hồ sơ: A004",
+    "[13:47:53 20/9/2026] Tự động đồng bộ lên GitHub thành công",
     "[13:47:49 20/9/2026] Cập nhật hồ sơ: A005",
     "[13:47:39 20/9/2026] Tự động đồng bộ lên GitHub thành công",
     "[13:47:36 20/9/2026] Cập nhật hồ sơ: A005",
@@ -133,5 +135,5 @@
     "[11:53:00 20/9/2026] Thêm mới hồ sơ: 11",
     "[11:52:06 20/9/2026] Lưu dữ liệu lên GitHub thành công"
   ],
-  "lastSync": "13:47:52 20/9/2026"
+  "lastSync": "13:48:00 20/9/2026"
 }
