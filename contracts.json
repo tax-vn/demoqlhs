@@ -44,12 +44,29 @@
       "expireDate": "",
       "attachments": "https://www.youtube.com/watch?v=CXazdJTF13Y",
       "content": ""
+    },
+    {
+      "id": 1789881093993,
+      "code": "aa",
+      "type": "Hợp đồng mua",
+      "partner": "",
+      "taxcode": "",
+      "contractValue": "2.143.431.431.414",
+      "signer": "",
+      "issueDate": "2026-09-20",
+      "receiveDate": "2026-09-27",
+      "effectDate": "2026-09-20",
+      "expireDate": "",
+      "attachments": "",
+      "content": ""
     }
   ],
   "settings": {
     "warningDays": 90
   },
   "logs": [
+    "[12:11:33 20/9/2026] Thêm mới hồ sơ: aa",
+    "[12:11:10 20/9/2026] Tải dữ liệu mới nhất từ GitHub",
     "[12:01:59 20/9/2026] Lỗi đồng bộ GitHub: Failed to fetch",
     "[12:01:46 20/9/2026] Lỗi đồng bộ GitHub: Failed to fetch",
     "[12:01:36 20/9/2026] Lỗi đồng bộ GitHub: Failed to fetch",
