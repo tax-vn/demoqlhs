@@ -4,7 +4,7 @@
       "id": 1789879980923,
       "code": "A005",
       "type": "Hợp đồng mua",
-      "partner": "aaaaaaaa",
+      "partner": "DN AAA",
       "taxcode": "0313091222",
       "contractValue": "1.000.000.000",
       "signer": "www",
@@ -80,6 +80,8 @@
     "warningDays": 90
   },
   "logs": [
+    "[13:47:49 20/9/2026] Cập nhật hồ sơ: A005",
+    "[13:47:39 20/9/2026] Tự động đồng bộ lên GitHub thành công",
     "[13:47:36 20/9/2026] Cập nhật hồ sơ: A005",
     "[13:47:33 20/9/2026] Tự động đồng bộ lên GitHub thành công",
     "[13:47:29 20/9/2026] Cập nhật hồ sơ: A004",
@@ -131,5 +133,5 @@
     "[11:53:00 20/9/2026] Thêm mới hồ sơ: 11",
     "[11:52:06 20/9/2026] Lưu dữ liệu lên GitHub thành công"
   ],
-  "lastSync": "13:47:38 20/9/2026"
+  "lastSync": "13:47:52 20/9/2026"
 }
