@@ -31,7 +31,7 @@
     <!-- Sidebar -->
     <aside class="w-64 bg-slate-800 text-white flex flex-col no-print h-full shadow-lg shrink-0">
         <div class="p-4 flex items-center justify-center border-b border-slate-700">
-            <h1 class="text-xl font-bold tracking-wider"><i class="fa-solid fa-folder-open mr-2"></i> QL HỒ SƠ</h1>
+            <h1 class="text-xl font-bold tracking-wider"><i class="fa-solid fa-folder-open mr-2"></i> QUẢN LÝ HỒ SƠ</h1>
         </div>
         <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
             <button onclick="switchTab('dashboard')" class="tab-btn w-full text-left px-4 py-3 rounded bg-blue-600 hover:bg-blue-500 transition"><i class="fa-solid fa-chart-pie w-6"></i> Tổng quan</button>
@@ -40,21 +40,15 @@
             <button onclick="switchTab('settings')" class="tab-btn w-full text-left px-4 py-3 rounded hover:bg-slate-700 transition"><i class="fa-solid fa-gear w-6"></i> Cài đặt & Dữ liệu</button>
             <button onclick="switchTab('logs')" class="tab-btn w-full text-left px-4 py-3 rounded hover:bg-slate-700 transition"><i class="fa-solid fa-clock-rotate-left w-6"></i> Nhật ký hệ thống</button>
         </nav>
-        <div class="p-4 text-xs text-slate-400 border-t border-slate-700 text-center flex flex-col gap-1">
-            <span>GitHub Sync: tax-vn/demoqlhs</span>
+        <div class="p-4 text-xs text-slate-400 border-t border-slate-700 text-center">
+            GitHub Sync: tax-vn/demoqlhs
         </div>
     </aside>
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col h-full overflow-y-auto">
         <header class="bg-white shadow p-4 flex justify-between items-center no-print sticky top-0 z-10">
-            <div class="flex items-center gap-4">
-                <h2 id="page-title" class="text-2xl font-semibold text-gray-700">Dashboard Tổng Quan</h2>
-                <!-- NƠI HIỂN THỊ TRẠNG THÁI ĐỒNG BỘ -->
-                <div id="sync-status" class="hidden md:flex items-center gap-2 text-sm px-3 py-1 rounded-full bg-gray-100 text-gray-600 font-medium transition-all duration-300 shadow-sm border">
-                    <i class="fa-solid fa-cloud"></i> <span>Chưa đồng bộ</span>
-                </div>
-            </div>
+            <h2 id="page-title" class="text-2xl font-semibold text-gray-700">Dashboard Tổng Quan</h2>
             <div id="quick-stats" class="text-sm font-medium text-gray-500"></div>
         </header>
 
@@ -89,12 +83,14 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white p-4 rounded shadow">
                         <h3 class="font-semibold mb-4 text-gray-700">Phân loại hồ sơ</h3>
+                        <!-- Đã fix khung giới hạn chiều cao cho biểu đồ -->
                         <div class="relative w-full h-[280px] flex justify-center">
                             <canvas id="chartType"></canvas>
                         </div>
                     </div>
                     <div class="bg-white p-4 rounded shadow">
                         <h3 class="font-semibold mb-4 text-gray-700">Hồ sơ theo năm ban hành</h3>
+                        <!-- Đã fix khung giới hạn chiều cao cho biểu đồ -->
                         <div class="relative w-full h-[280px]">
                             <canvas id="chartYear"></canvas>
                         </div>
@@ -188,17 +184,17 @@
             <!-- 6 & 7. CÀI ĐẶT, ĐỒNG BỘ GITHUB, BACKUP -->
             <div id="tab-settings" class="tab-content space-y-6">
                 <!-- GitHub Settings -->
-                <div class="bg-white p-6 rounded shadow border-t-4 border-blue-500">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2"><i class="fa-brands fa-github"></i> Đồng bộ đám mây GitHub (tax-vn/demoqlhs)</h3>
+                <div class="bg-white p-6 rounded shadow">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2"><i class="fa-brands fa-github"></i> Đồng bộ GitHub (tax-vn/demoqlhs)</h3>
                     <div class="flex flex-col gap-4 max-w-lg">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">GitHub Personal Access Token</label>
-                            <input type="password" id="github-token" class="border p-2 rounded w-full bg-blue-50 focus:bg-white" placeholder="ghp_xxxxxxxxxxxx...">
-                            <p class="text-xs text-gray-500 mt-1">Lưu trữ an toàn trên trình duyệt máy bạn. Cần quyền 'repo'. Khi đã cấu hình, hệ thống sẽ tự động đồng bộ khi bạn thêm/sửa/xóa hồ sơ.</p>
+                            <input type="password" id="github-token" class="border p-2 rounded w-full" placeholder="ghp_xxxxxxxxxxxx...">
+                            <p class="text-xs text-gray-500 mt-1">Lưu trữ trên máy, không lưu vào mã nguồn. Cần quyền 'repo'.</p>
                         </div>
                         <div class="flex gap-4">
-                            <button onclick="githubPull()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex-1 font-medium"><i class="fa-solid fa-cloud-arrow-down"></i> Tải dữ liệu về</button>
-                            <button onclick="githubPush(false)" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex-1 font-medium"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu bắt buộc (Thủ công)</button>
+                            <button onclick="githubPull()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex-1"><i class="fa-solid fa-cloud-arrow-down"></i> Tải dữ liệu về</button>
+                            <button onclick="githubPush()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex-1"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu lên GitHub</button>
                         </div>
                     </div>
                 </div>
@@ -209,18 +205,18 @@
                         <h3 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2"><i class="fa-solid fa-sliders"></i> Cài đặt hệ thống</h3>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cảnh báo trước khi hết hạn (Ngày)</label>
                         <input type="number" id="setting-warning-days" class="border p-2 rounded w-full mb-2" value="90">
-                        <button onclick="saveSettings()" class="bg-slate-800 text-white px-4 py-2 rounded hover:bg-slate-700 w-full font-medium">Lưu Cài Đặt</button>
+                        <button onclick="saveSettings()" class="bg-slate-800 text-white px-4 py-2 rounded hover:bg-slate-700 w-full">Lưu Cài Đặt</button>
                     </div>
                     
                     <div class="flex-1 min-w-[300px]">
                         <h3 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2"><i class="fa-solid fa-database"></i> Backup & Phục hồi cục bộ</h3>
                         <div class="flex flex-col gap-2">
-                            <button onclick="exportJSON()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 font-medium"><i class="fa-solid fa-download"></i> Backup toàn bộ (JSON)</button>
-                            <label class="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600 text-center cursor-pointer font-medium">
+                            <button onclick="exportJSON()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600"><i class="fa-solid fa-download"></i> Backup toàn bộ (JSON)</button>
+                            <label class="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600 text-center cursor-pointer">
                                 <i class="fa-solid fa-upload"></i> Import JSON
                                 <input type="file" id="import-file" class="hidden" accept=".json" onchange="importJSON(event)">
                             </label>
-                            <button onclick="exportCSV()" class="bg-emerald-500 text-white px-4 py-2 rounded hover:bg-emerald-600 font-medium"><i class="fa-solid fa-file-csv"></i> Xuất danh sách Excel (CSV)</button>
+                            <button onclick="exportCSV()" class="bg-emerald-500 text-white px-4 py-2 rounded hover:bg-emerald-600"><i class="fa-solid fa-file-csv"></i> Xuất danh sách Excel (CSV)</button>
                         </div>
                     </div>
                 </div>
@@ -230,7 +226,7 @@
             <div id="tab-logs" class="tab-content">
                 <div class="bg-white p-4 rounded shadow h-full">
                     <button onclick="clearLogs()" class="bg-red-500 text-white px-3 py-1 rounded text-sm mb-4">Xóa nhật ký</button>
-                    <ul id="log-list" class="space-y-2 text-sm font-mono text-gray-600 h-[600px] overflow-y-auto"></ul>
+                    <ul id="log-list" class="space-y-2 text-sm font-mono text-gray-600 h-96 overflow-y-auto"></ul>
                 </div>
             </div>
 
@@ -310,35 +306,13 @@
         let data = {
             records: [],
             settings: { warningDays: 90 },
-            logs: [],
-            lastSync: null // Thêm cờ lưu thời gian đồng bộ cuối
+            logs: []
         };
         let charts = {};
         const GITHUB = { owner: 'tax-vn', repo: 'demoqlhs', path: 'contracts.json' };
         let githubFileSha = null;
 
-        // Cập nhật giao diện Đồng Bộ
-        function updateSyncUI(status, time = null) {
-            const el = document.getElementById('sync-status');
-            if (!el) return;
-            
-            if (status === 'syncing') {
-                el.className = 'hidden md:flex items-center gap-2 text-sm px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-medium transition-all shadow-sm';
-                el.innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin"></i> <span>Đang đồng bộ...</span>';
-            } else if (status === 'success') {
-                el.className = 'hidden md:flex items-center gap-2 text-sm px-3 py-1.5 rounded-full bg-green-50 text-green-700 border border-green-200 font-medium transition-all shadow-sm';
-                el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> <span>Đã đồng bộ: ${time}</span>`;
-            } else if (status === 'error') {
-                el.className = 'hidden md:flex items-center gap-2 text-sm px-3 py-1.5 rounded-full bg-red-50 text-red-700 border border-red-200 font-medium transition-all shadow-sm cursor-help';
-                el.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <span>Lỗi đồng bộ</span>';
-                el.title = "Có lỗi xảy ra, vui lòng kiểm tra mạng hoặc thử Đồng bộ thủ công trong phần Cài đặt.";
-            } else if (status === 'unconfigured') {
-                el.className = 'hidden md:flex items-center gap-2 text-sm px-3 py-1.5 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200 font-medium transition-all shadow-sm';
-                el.innerHTML = '<i class="fa-solid fa-gear"></i> <span>Chưa cấu hình GitHub</span>';
-            }
-        }
-
-        // Auto-format tiền
+        // Hàm auto-format giá trị tiền tệ
         function formatCurrency(input) {
             let cursorPosition = input.selectionStart;
             let originalLength = input.value.length;
@@ -350,6 +324,7 @@
             input.setSelectionRange(newPosition, newPosition);
         }
 
+        // Quản lý các ô nhập Link đính kèm
         function addAttachmentField(val = '') {
             const container = document.getElementById('attachments-container');
             const div = document.createElement('div');
@@ -369,26 +344,14 @@
                     data.records = parsed.records || [];
                     data.settings = parsed.settings || { warningDays: 90 };
                     data.logs = parsed.logs || [];
-                    data.lastSync = parsed.lastSync || null;
                 } catch(e){}
             }
-            
-            const token = localStorage.getItem('qlhs_github_token') || '';
-            document.getElementById('github-token').value = token;
+            document.getElementById('github-token').value = localStorage.getItem('qlhs_github_token') || '';
             document.getElementById('setting-warning-days').value = data.settings.warningDays;
             
             updatePartnerFilter();
             switchTab('dashboard');
-            
-            // Xử lý huy hiệu đồng bộ lúc khởi động
-            if (!token) {
-                updateSyncUI('unconfigured');
-            } else if (data.lastSync) {
-                updateSyncUI('success', data.lastSync);
-            }
-
-            // Chỉ ghi log khởi động nếu mảng log đang trống để tránh rác
-            if(data.logs.length === 0) addLog("Hệ thống khởi động");
+            addLog("Hệ thống khởi động");
         }
 
         function saveDataLocal() {
@@ -491,6 +454,7 @@
                 </tr>
             `).join('');
 
+            // Khởi tạo Chart Type (Pie)
             if(charts.type) charts.type.destroy();
             charts.type = new Chart(document.getElementById('chartType'), {
                 type: 'pie',
@@ -498,6 +462,7 @@
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
+            // Khởi tạo Chart Year (Bar)
             if(charts.year) charts.year.destroy();
             const sortedYears = Object.keys(yearCount).sort();
             charts.year = new Chart(document.getElementById('chartYear'), {
@@ -537,7 +502,7 @@
                 return true;
             });
 
-            filtered.sort((a, b) => b.id - a.id); 
+            filtered.sort((a, b) => b.id - a.id); // Mới nhất lên đầu
 
             document.getElementById('records-tbody').innerHTML = filtered.map((r, index) => `
                 <tr class="hover:bg-blue-50 border-b transition-colors group">
@@ -596,13 +561,12 @@
         }
 
         function renderLogs() {
-            document.getElementById('log-list').innerHTML = data.logs.map(l => `<li class="border-b border-gray-100 py-1">${l}</li>`).join('');
+            document.getElementById('log-list').innerHTML = data.logs.map(l => `<li>${l}</li>`).join('');
         }
         function clearLogs() {
             if(confirm("Bạn muốn xóa toàn bộ lịch sử thao tác cục bộ?")) {
                 data.logs = [];
                 addLog("Đã xóa lịch sử thao tác");
-                githubPush(true); // Auto sync
             }
         }
 
@@ -611,6 +575,7 @@
             document.querySelectorAll('#record-modal input:not(.attachment-input), #record-modal textarea').forEach(el => el.value = '');
             document.getElementById('form-type').selectedIndex = 0;
             
+            // Xóa rỗng danh sách link và tạo 1 ô trống mặc định
             document.getElementById('attachments-container').innerHTML = '';
             addAttachmentField();
 
@@ -625,6 +590,7 @@
         function saveRecord() {
             const idVal = document.getElementById('form-id').value;
             
+            // Gom dữ liệu từ tất cả các ô nhập link
             const attInputs = document.querySelectorAll('.attachment-input');
             const attValues = Array.from(attInputs).map(input => input.value.trim()).filter(val => val !== '');
             const attachmentsString = attValues.join(',');
@@ -659,9 +625,6 @@
             saveDataLocal();
             closeRecordModal();
             renderRecords();
-            
-            // Kích hoạt Tự động đồng bộ lên GitHub
-            githubPush(true);
         }
 
         function editRecord(id) {
@@ -680,6 +643,7 @@
             document.getElementById('form-expire').value = r.expireDate || '';
             document.getElementById('form-content').value = r.content || '';
             
+            // Xử lý nạp các link tài liệu vào thành từng ô
             const container = document.getElementById('attachments-container');
             container.innerHTML = '';
             if (r.attachments && r.attachments.trim() !== '') {
@@ -688,7 +652,7 @@
                     if(att.trim() !== '') addAttachmentField(att.trim());
                 });
             } else {
-                addAttachmentField();
+                addAttachmentField(); // Tạo 1 ô trống nếu không có link nào
             }
 
             document.getElementById('modal-title').innerText = "Cập Nhật Hồ Sơ";
@@ -702,9 +666,6 @@
                 addLog(`Xóa hồ sơ: ${r.code}`);
                 saveDataLocal();
                 renderRecords();
-                
-                // Kích hoạt Tự động đồng bộ lên GitHub
-                githubPush(true);
             }
         }
 
@@ -712,18 +673,10 @@
             const days = parseInt(document.getElementById('setting-warning-days').value);
             const token = document.getElementById('github-token').value.trim();
             if(!isNaN(days)) data.settings.warningDays = days;
-            
-            if(token !== localStorage.getItem('qlhs_github_token')) {
-                 localStorage.setItem('qlhs_github_token', token);
-                 addLog("Cập nhật Token GitHub");
-            }
-            
+            localStorage.setItem('qlhs_github_token', token);
             saveDataLocal();
             addLog("Thay đổi cài đặt hệ thống");
             alert("Lưu cài đặt thành công!");
-            
-            if(token) updateSyncUI(data.lastSync ? 'success' : 'syncing', data.lastSync);
-            else updateSyncUI('unconfigured');
         }
 
         function exportJSON() {
@@ -774,26 +727,21 @@
             addLog("Xuất danh sách ra CSV");
         }
 
-        // --- GITHUB API & TỰ ĐỘNG ĐỒNG BỘ ---
+        // --- GITHUB API ---
         const b64EncodeUnicode = str => btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
         const b64DecodeUnicode = str => decodeURIComponent(Array.prototype.map.call(atob(str), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
 
         async function githubPull() {
-            const token = document.getElementById('github-token').value.trim() || localStorage.getItem('qlhs_github_token');
-            if(!token) return alert("Vui lòng nhập Token GitHub trong Cài đặt!");
+            const token = document.getElementById('github-token').value.trim();
+            if(!token) return alert("Vui lòng nhập Token GitHub!");
             
             try {
                 document.body.style.cursor = 'wait';
-                updateSyncUI('syncing');
-                
                 const res = await fetch(`https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.path}`, {
-                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache' }
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
                 
-                if (res.status === 404) {
-                    updateSyncUI('success', 'Chưa có file trên GitHub');
-                    return alert("File không tồn tại trên GitHub. Bạn hãy bấm Lưu lên GitHub để tạo mới.");
-                }
+                if (res.status === 404) return alert("File không tồn tại trên GitHub. Bạn có thể Lưu dữ liệu lên để tạo mới.");
                 if (!res.ok) throw new Error("Lỗi xác thực (HTTP " + res.status + ")");
                 
                 const fileInfo = await res.json();
@@ -803,54 +751,36 @@
                 const remoteData = JSON.parse(contentStr);
                 
                 if (remoteData && remoteData.records) {
-                    const time = new Date().toLocaleString('vi-VN');
-                    remoteData.lastSync = time; // Gắn cờ thời gian tải về
-                    
                     data = remoteData;
                     saveDataLocal();
                     addLog("Tải dữ liệu mới nhất từ GitHub");
-                    updateSyncUI('success', time);
                     alert("Tải dữ liệu thành công!");
                     location.reload();
                 }
             } catch(e) {
-                updateSyncUI('error');
                 alert("Lỗi khi tải từ GitHub: " + e.message);
             } finally {
                 document.body.style.cursor = 'default';
             }
         }
 
-        // isAuto = true tức là chạy ngầm tự động, không hiện cảnh báo
-        async function githubPush(isAuto = false) {
-            const token = document.getElementById('github-token').value.trim() || localStorage.getItem('qlhs_github_token');
-            
-            if(!token) {
-                updateSyncUI('unconfigured');
-                if(!isAuto) alert("Vui lòng nhập Token GitHub trong Cài đặt!");
-                return;
-            }
+        async function githubPush() {
+            const token = document.getElementById('github-token').value.trim();
+            if(!token) return alert("Vui lòng nhập Token GitHub!");
             
             try {
-                if(!isAuto) document.body.style.cursor = 'wait';
-                updateSyncUI('syncing');
-                
-                // 1. Lấy SHA mới nhất để tránh đụng độ
+                document.body.style.cursor = 'wait';
                 const getRes = await fetch(`https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.path}`, {
-                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache' }
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
                 if(getRes.ok) {
                     const fileInfo = await getRes.json();
                     githubFileSha = fileInfo.sha;
                 }
 
-                // 2. Chuẩn bị dữ liệu và Push
-                const time = new Date().toLocaleString('vi-VN');
-                data.lastSync = time; // Cập nhật thời gian lưu
-                
                 const content = b64EncodeUnicode(JSON.stringify(data, null, 2));
                 const body = {
-                    message: `Auto-Sync dữ liệu lúc ${time}`,
+                    message: `Cập nhật dữ liệu lúc ${new Date().toLocaleString('vi-VN')}`,
                     content: content,
                     sha: githubFileSha || undefined
                 };
@@ -866,18 +796,12 @@
                 const putData = await putRes.json();
                 githubFileSha = putData.content.sha;
                 
-                saveDataLocal(); // Lưu lại cờ thời gian xuống máy
-                updateSyncUI('success', time);
-                addLog(isAuto ? "Tự động đồng bộ (Auto-Sync) thành công" : "Lưu dữ liệu lên GitHub thành công");
-                
-                if(!isAuto) alert("Đồng bộ lên GitHub thành công!");
-                
+                addLog("Lưu dữ liệu lên GitHub thành công");
+                alert("Đồng bộ lên GitHub thành công!");
             } catch(e) {
-                updateSyncUI('error');
-                addLog("Lỗi đồng bộ GitHub: " + e.message);
-                if(!isAuto) alert("Lỗi khi lưu lên GitHub: " + e.message);
+                alert("Lỗi khi lưu lên GitHub: " + e.message);
             } finally {
-                if(!isAuto) document.body.style.cursor = 'default';
+                document.body.style.cursor = 'default';
             }
         }
 
