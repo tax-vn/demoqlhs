@@ -28,7 +28,7 @@
       "effectDate": "2026-09-20",
       "expireDate": "",
       "attachments": "https://www.youtube.com/watch?v=CXazdJTF13Y",
-      "content": ""
+      "content": "hhgkh"
     },
     {
       "id": 1789880037325,
@@ -65,6 +65,8 @@
     "warningDays": 90
   },
   "logs": [
+    "[12:33:43 20/9/2026] Cập nhật hồ sơ: aaa",
+    "[12:33:20 20/9/2026] Tải dữ liệu mới nhất từ GitHub",
     "[12:32:07 20/9/2026] Xóa hồ sơ: eeee",
     "[12:32:02 20/9/2026] Lưu dữ liệu lên GitHub (Thủ công)",
     "[12:31:52 20/9/2026] Xóa hồ sơ: aa",
@@ -97,5 +99,5 @@
     "[11:53:00 20/9/2026] Thêm mới hồ sơ: 11",
     "[11:52:06 20/9/2026] Lưu dữ liệu lên GitHub thành công"
   ],
-  "lastSync": "12:32:07 20/9/2026"
+  "lastSync": "12:33:43 20/9/2026"
 }
