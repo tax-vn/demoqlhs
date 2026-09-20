@@ -1,7 +1,60 @@
 {
-  "records": [],
+  "records": [
+    {
+      "id": 1789879980923,
+      "code": "11",
+      "type": "Hợp đồng mua",
+      "partner": "aaaaaaaa",
+      "taxcode": "0313091222",
+      "contractValue": "1.000.000.000",
+      "signer": "www",
+      "issueDate": "2026-09-20",
+      "receiveDate": "",
+      "effectDate": "2026-09-20",
+      "expireDate": "2026-09-30",
+      "attachments": "https://www.youtube.com/watch?v=CXazdJTF13Y,https://www.youtube.com/watch?v=CXazdJTF13Y",
+      "content": ""
+    },
+    {
+      "id": 1789880020178,
+      "code": "aaa",
+      "type": "Hợp đồng mua",
+      "partner": "",
+      "taxcode": "",
+      "contractValue": "165.406.165.165",
+      "signer": "",
+      "issueDate": "2026-09-20",
+      "receiveDate": "",
+      "effectDate": "2026-09-20",
+      "expireDate": "",
+      "attachments": "https://www.youtube.com/watch?v=CXazdJTF13Y",
+      "content": ""
+    },
+    {
+      "id": 1789880037325,
+      "code": "111",
+      "type": "Hợp đồng mua",
+      "partner": "",
+      "taxcode": "",
+      "contractValue": "234.434.124",
+      "signer": "",
+      "issueDate": "",
+      "receiveDate": "",
+      "effectDate": "2026-09-20",
+      "expireDate": "",
+      "attachments": "https://www.youtube.com/watch?v=CXazdJTF13Y",
+      "content": ""
+    }
+  ],
   "settings": {
     "warningDays": 90
   },
-  "logs": []
+  "logs": [
+    "[11:54:31 20/9/2026] Cập nhật hồ sơ: aaa",
+    "[11:54:21 20/9/2026] Cập nhật hồ sơ: 11",
+    "[11:53:57 20/9/2026] Thêm mới hồ sơ: 111",
+    "[11:53:40 20/9/2026] Thêm mới hồ sơ: aaa",
+    "[11:53:00 20/9/2026] Thêm mới hồ sơ: 11",
+    "[11:52:06 20/9/2026] Lưu dữ liệu lên GitHub thành công"
+  ]
 }
